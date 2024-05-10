@@ -26,8 +26,7 @@ type Arc = {
   color: Array<string>;
 };
 
-function Globe() {
-  // globe land shapes
+function useLandPolygons() {
   const [landPolygons, setLandPolygons] = useState([]);
   useEffect(() => {
     async function fetchLandPolygons() {
@@ -46,7 +45,126 @@ function Globe() {
     transparent: true
   });
 
-  // globe object config
+  return { landPolygons, polygonMaterial };
+}
+
+function usePoints() {
+  const [altitude, setAltitude] = useState(0.002);
+  return {
+    pointAltitude: altitude,
+    points: albums
+  };
+}
+
+function useRings(globeElRef) {
+  const [rings, setRings] = useState<Array<Ring>>([]);
+  const colorInterpolator = t => `rgba(255,100,50,${Math.sqrt(1 - t)})`;
+
+  const [enterTimeoutId, setEnterTimeoutId] = useState<NodeJS.Timeout>();
+  function handleMouseEnter({ lat, lng, name, type }) {
+    clearTimeout(enterTimeoutId);
+    globeElRef.controls().autoRotateSpeed = 0.1;
+
+    const id = setTimeout(() => {
+      if (type === types.LOCATION) {
+        globeElRef.pointOfView(
+          {
+            lat,
+            lng,
+            altitude: 1
+          },
+          1000
+        );
+
+        globeElRef.controls().autoRotateSpeed = 0.75;
+
+        setRings([
+          { lat, lng, maxR: 9, propagationSpeed: 0.75, repeatPeriod: 1750 }
+        ]);
+      } else if (type === types.CUSTOM) {
+        globeElRef.controls().autoRotateSpeed = 4.44;
+
+        setRings([
+          {
+            lat: 90,
+            lng: 0,
+            maxR: 180,
+            propagationSpeed: 20,
+            repeatPeriod: 200
+          }
+        ]);
+      }
+    }, 0);
+    setEnterTimeoutId(id);
+  }
+  function handleMouseLeave() {
+    globeElRef.pointOfView(
+      {
+        lat: 30,
+        altitude: 2
+      },
+      1000
+    );
+
+    globeElRef.controls().autoRotateSpeed = 1.5;
+
+    setRings([]);
+  }
+
+  return { rings, colorInterpolator, handleMouseEnter, handleMouseLeave };
+}
+
+function useArcs() {
+  const [arcs, setArcs] = useState<Array<Arc>>([]);
+  useEffect(() => {
+    const data = [];
+    for (let i = 0; i < albums.length; i++) {
+      for (let j = i + 1; j < albums.length; j++) {
+        data.push({
+          startLat: albums[i].lat,
+          startLng: albums[i].lng,
+          endLat: albums[j].lat,
+          endLng: albums[j].lng,
+          color: ['red', 'red']
+        });
+      }
+    }
+    setArcs(data);
+  }, []);
+
+  return { arcs };
+}
+
+function useCustomLayer(globeElRef) {
+  const customLayerData = [...Array(500).keys()].map(() => ({
+    lat: (Math.random() - 0.5) * 180,
+    lng: (Math.random() - 0.5) * 360,
+    alt: Math.random() * 1.4 + 0.1
+  }));
+  const customThreeObject = () =>
+    new THREE.Mesh(
+      new THREE.SphereGeometry(0.22),
+      new THREE.MeshBasicMaterial({
+        color: '#777777',
+        opacity: 0.25,
+        transparent: true
+      })
+    );
+  const customThreeObjectUpdate = (object, objectData) =>
+    Object.assign(
+      object.position,
+      globeElRef?.getCoords(objectData.lat, objectData.lng, objectData.alt)
+    );
+
+  return {
+    customLayerData,
+    customThreeObject,
+    customThreeObjectUpdate
+  };
+}
+
+function Globe() {
+  // object config
   const globeEl = useRef();
   const globeElRef = globeEl.current;
   const handleGlobeReady = () => {
@@ -60,7 +178,7 @@ function Globe() {
     globeElRef.pointOfView({ lat: 30, lng: -30, altitude: 2 });
   };
 
-  // globe scene config
+  // scene config
   useEffect(() => {
     if (!globeElRef) return;
 
@@ -95,104 +213,25 @@ function Globe() {
     scene.add(innerSphere);
   }, [globeElRef]);
 
-  // globe rings animation
-  const [rings, setRings] = useState<Array<Ring>>([]);
-  const colorInterpolator = t => `rgba(255,100,50,${Math.sqrt(1 - t)})`;
+  // land shapes
+  const { landPolygons, polygonMaterial } = useLandPolygons();
 
-  const [enterTimeoutId, setEnterTimeoutId] = useState<NodeJS.Timeout>();
-  function handleMouseEnter({ lat, lng, name, type }) {
-    clearTimeout(enterTimeoutId);
-    globeElRef.controls().autoRotateSpeed = 0.1;
+  // `albums` map points
+  const { points, pointAltitude } = usePoints();
 
-    const id = setTimeout(() => {
-      if (type === types.LOCATION) {
-        globeElRef.pointOfView(
-          {
-            lat,
-            lng,
-            altitude: 1
-          },
-          1000
-        );
+  // rings animation
+  const { rings, colorInterpolator, handleMouseEnter, handleMouseLeave } =
+    useRings(globeElRef);
 
-        globeElRef.controls().autoRotateSpeed = 0.75;
-
-        setRings([
-          { lat, lng, maxR: 9, propagationSpeed: 0.75, repeatPeriod: 1750 }
-        ]);
-      } else if (type === types.CUSTOM) {
-        globeElRef.controls().autoRotateSpeed = 4;
-
-        setRings([
-          {
-            lat: 90,
-            lng: 0,
-            maxR: 180,
-            propagationSpeed: 20,
-            repeatPeriod: 200
-          }
-        ]);
-      }
-    }, 0);
-    setEnterTimeoutId(id);
-  }
-  function handleMouseLeave() {
-    globeElRef.pointOfView(
-      {
-        lat: 30,
-        altitude: 2
-      },
-      1000
-    );
-
-    globeElRef.controls().autoRotateSpeed = 1.5;
-
-    setRings([]);
-  }
-
-  // globe arcs animation
-  const [arcs, setArcs] = useState<Array<Arc>>([]);
-  useEffect(() => {
-    const data = [];
-    for (let i = 0; i < albums.length; i++) {
-      for (let j = i + 1; j < albums.length; j++) {
-        data.push({
-          startLat: albums[i].lat,
-          startLng: albums[i].lng,
-          endLat: albums[j].lat,
-          endLng: albums[j].lng,
-          color: ['red', 'red']
-        });
-      }
-    }
-    setArcs(data);
-  }, []);
+  // arcs animation
+  const { arcs } = useArcs();
 
   // resize canvas on resize viewport
   const { width, height } = useWindowSize();
 
-  // background spheres
-  const backgroundLayer = {
-    customLayerData: [...Array(500).keys()].map(() => ({
-      lat: (Math.random() - 0.5) * 180,
-      lng: (Math.random() - 0.5) * 360,
-      alt: Math.random() * 1.4 + 0.1
-    })),
-    customThreeObject: () =>
-      new THREE.Mesh(
-        new THREE.SphereGeometry(0.22),
-        new THREE.MeshBasicMaterial({
-          color: '#777777',
-          opacity: 0.25,
-          transparent: true
-        })
-      ),
-    customThreeObjectUpdate: (object, objectData) =>
-      Object.assign(
-        object.position,
-        globeElRef?.getCoords(objectData.lat, objectData.lng, objectData.alt)
-      )
-  };
+  // stars in the background
+  const { customLayerData, customThreeObject, customThreeObjectUpdate } =
+    useCustomLayer(globeElRef);
 
   return (
     <section className="globe-container">
@@ -214,6 +253,11 @@ function Globe() {
         polygonAltitude={() => 0}
         polygonSideColor={() => 'rgba(255, 255, 255, 0)'}
         polygonStrokeColor={() => 'darkslategray'}
+        pointsData={points}
+        pointColor={() => 'rgba(255, 0, 0, 0.75)'}
+        pointAltitude={pointAltitude}
+        pointRadius={0.19}
+        pointsMerge={true}
         ringsData={rings}
         ringColor={() => colorInterpolator}
         ringMaxRadius="maxR"
@@ -224,9 +268,9 @@ function Globe() {
         arcDashLength={() => Math.random() / 1}
         arcDashGap={() => Math.random() * 10}
         arcDashAnimateTime={() => Math.random() * 20000 + 500}
-        customLayerData={backgroundLayer.customLayerData}
-        customThreeObject={backgroundLayer.customThreeObject}
-        customThreeObjectUpdate={backgroundLayer.customThreeObjectUpdate}
+        customLayerData={customLayerData}
+        customThreeObject={customThreeObject}
+        customThreeObjectUpdate={customThreeObjectUpdate}
       />
 
       <section
@@ -249,7 +293,12 @@ function Globe() {
                   handleMouseLeave();
                 }}
               >
-                <Link href={`/${album.name.toLowerCase()}`}>{album.name}</Link>
+                <Link
+                  href={`/${album.name.toLowerCase()}`}
+                  className="hover:text-gray-500"
+                >
+                  {album.name}
+                </Link>
               </li>
             );
           })}
