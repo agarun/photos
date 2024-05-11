@@ -88,7 +88,7 @@ function useRings(globeElRef, setPointAltitude) {
         globeElRef.controls().autoRotateSpeed = 0.75;
 
         setRings([
-          { lat, lng, maxR: 9, propagationSpeed: 0.75, repeatPeriod: 1750 }
+          { lat, lng, maxR: 9, propagationSpeed: 0.88, repeatPeriod: 1777 }
         ]);
       } else if (type === types.CUSTOM) {
         setPointAltitude(2);
@@ -101,8 +101,8 @@ function useRings(globeElRef, setPointAltitude) {
             lat: 90,
             lng: 0,
             maxR: 180,
-            propagationSpeed: 20,
-            repeatPeriod: 200
+            propagationSpeed: 27,
+            repeatPeriod: 195
           }
         ]);
       }
