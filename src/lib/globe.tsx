@@ -26,6 +26,10 @@ type Arc = {
   color: Array<string>;
 };
 
+function randomInRange(min: number, max: number): number {
+  return Math.random() * (max - min) + min;
+}
+
 function useLandPolygons() {
   const [landPolygons, setLandPolygons] = useState([]);
   useEffect(() => {
@@ -52,18 +56,22 @@ function usePoints() {
   const [altitude, setAltitude] = useState(0.002);
   return {
     pointAltitude: altitude,
+    setPointAltitude: setAltitude,
     points: albums
   };
 }
 
-function useRings(globeElRef) {
+function useRings(globeElRef, setPointAltitude) {
+  const [activeAlbum, setActiveAlbum] = useState<typeof albums>();
+
   const [rings, setRings] = useState<Array<Ring>>([]);
   const colorInterpolator = t => `rgba(255,100,50,${Math.sqrt(1 - t)})`;
 
   const [enterTimeoutId, setEnterTimeoutId] = useState<NodeJS.Timeout>();
   function handleMouseEnter({ lat, lng, name, type }) {
+    setActiveAlbum(name);
+
     clearTimeout(enterTimeoutId);
-    globeElRef.controls().autoRotateSpeed = 0.1;
 
     const id = setTimeout(() => {
       if (type === types.LOCATION) {
@@ -76,13 +84,17 @@ function useRings(globeElRef) {
           1000
         );
 
+        globeElRef.controls().autoRotateForced = true;
         globeElRef.controls().autoRotateSpeed = 0.75;
 
         setRings([
           { lat, lng, maxR: 9, propagationSpeed: 0.75, repeatPeriod: 1750 }
         ]);
       } else if (type === types.CUSTOM) {
-        globeElRef.controls().autoRotateSpeed = 4.44;
+        setPointAltitude(2);
+
+        globeElRef.controls().autoRotateForced = true;
+        globeElRef.controls().autoRotateSpeed = 3 * DEFAULT_AUTOROTATE_SPEED;
 
         setRings([
           {
@@ -98,6 +110,10 @@ function useRings(globeElRef) {
     setEnterTimeoutId(id);
   }
   function handleMouseLeave() {
+    setPointAltitude(0.002);
+
+    setActiveAlbum();
+
     globeElRef.pointOfView(
       {
         lat: 30,
@@ -106,30 +122,41 @@ function useRings(globeElRef) {
       1000
     );
 
+    globeElRef.controls().autoRotateForced = false;
     globeElRef.controls().autoRotateSpeed = 1.5;
 
     setRings([]);
   }
 
-  return { rings, colorInterpolator, handleMouseEnter, handleMouseLeave };
+  return {
+    activeAlbum,
+    rings,
+    colorInterpolator,
+    handleMouseEnter,
+    handleMouseLeave
+  };
+}
+
+function generateArcs() {
+  const data = [];
+  for (let i = 0; i < albums.length; i++) {
+    for (let j = i + 1; j < albums.length; j++) {
+      data.push({
+        startLat: albums[i].lat,
+        startLng: albums[i].lng,
+        endLat: albums[j].lat,
+        endLng: albums[j].lng,
+        color: ['red', 'red']
+      });
+    }
+  }
+  return data;
 }
 
 function useArcs() {
   const [arcs, setArcs] = useState<Array<Arc>>([]);
   useEffect(() => {
-    const data = [];
-    for (let i = 0; i < albums.length; i++) {
-      for (let j = i + 1; j < albums.length; j++) {
-        data.push({
-          startLat: albums[i].lat,
-          startLng: albums[i].lng,
-          endLat: albums[j].lat,
-          endLng: albums[j].lng,
-          color: ['red', 'red']
-        });
-      }
-    }
-    setArcs(data);
+    setArcs(generateArcs());
   }, []);
 
   return { arcs };
@@ -163,21 +190,67 @@ function useCustomLayer(globeElRef) {
   };
 }
 
+const DEFAULT_AUTOROTATE_SPEED = 1.75;
+
 function Globe() {
   // object config
   const globeEl = useRef();
   const globeElRef = globeEl.current;
+
+  const autoRotateSpeed = () => {
+    if (globeElRef) {
+      const { lng } = globeElRef.pointOfView();
+      let newSpeed = DEFAULT_AUTOROTATE_SPEED;
+
+      // [ [ longitude, speed multiplier ], ... ]
+      const gradientSteps = [
+        [165, 2],
+        [160, 1.825],
+        [155, 1.75],
+        [150, 1.5],
+        [145, 1.25],
+        [-120, 2.25],
+        [-110, 1.75],
+        [-115, 1.5],
+        [-100, 1.35],
+        [-95, 1.25],
+        [-90, 1.15]
+      ];
+      for (const [longitude, multiplier] of gradientSteps) {
+        if (longitude < 0 && lng < longitude) {
+          // west of california
+          newSpeed = multiplier * DEFAULT_AUTOROTATE_SPEED;
+          break;
+        }
+        if (longitude > 0 && lng > longitude) {
+          // east of japan
+          newSpeed = multiplier * DEFAULT_AUTOROTATE_SPEED;
+          break;
+        }
+      }
+      if (
+        !globeElRef.controls().autoRotateForced &&
+        newSpeed !== DEFAULT_AUTOROTATE_SPEED
+      ) {
+        // faster over the ocean
+        globeElRef.controls().autoRotateSpeed = newSpeed;
+      }
+    }
+    requestAnimationFrame(autoRotateSpeed);
+  };
+
   const handleGlobeReady = () => {
     globeElRef.controls().enabled = false;
 
     globeElRef.controls().enableZoom = false;
 
     globeElRef.controls().autoRotate = true;
-    globeElRef.controls().autoRotateSpeed = 1.5;
+    globeElRef.controls().autoRotateSpeed = DEFAULT_AUTOROTATE_SPEED;
 
     globeElRef.pointOfView({ lat: 30, lng: -30, altitude: 2 });
-  };
 
+    autoRotateSpeed();
+  };
   // scene config
   useEffect(() => {
     if (!globeElRef) return;
@@ -217,11 +290,11 @@ function Globe() {
   const { landPolygons, polygonMaterial } = useLandPolygons();
 
   // `albums` map points
-  const { points, pointAltitude } = usePoints();
+  const { points, pointAltitude, setPointAltitude } = usePoints();
 
   // rings animation
   const { rings, colorInterpolator, handleMouseEnter, handleMouseLeave } =
-    useRings(globeElRef);
+    useRings(globeElRef, setPointAltitude);
 
   // arcs animation
   const { arcs } = useArcs();
@@ -265,9 +338,9 @@ function Globe() {
         ringRepeatPeriod="repeatPeriod"
         arcsData={arcs}
         arcColor={'color'}
-        arcDashLength={() => Math.random() / 1}
-        arcDashGap={() => Math.random() * 10}
-        arcDashAnimateTime={() => Math.random() * 20000 + 500}
+        arcDashLength={() => randomInRange(0.06, 0.7) / 1} // the bigger the ranges, the calmer it looks
+        arcDashGap={() => randomInRange(0.025, 0.4) * 10}
+        arcDashAnimateTime={() => randomInRange(0.08, 0.8) * 20000 + 500}
         customLayerData={customLayerData}
         customThreeObject={customThreeObject}
         customThreeObjectUpdate={customThreeObjectUpdate}
