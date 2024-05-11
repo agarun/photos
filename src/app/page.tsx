@@ -6,7 +6,7 @@ const Globe = dynamic(() => import('@/lib/globe'), {
   ssr: false
 });
 
-export default function Home() {
+export default function Page() {
   return (
     <main role="main">
       <Globe />
