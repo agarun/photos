@@ -37,3 +37,5 @@ export const Masonry = ({ items = [], ...props }) => {
     </section>
   );
 };
+
+export default Masonry;
