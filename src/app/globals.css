@@ -8,6 +8,7 @@
   }
 }
 
+/* Homepage */
 .globe-container {
   & > div {
     position: absolute;
@@ -18,11 +19,9 @@
     animation: fadeIn 3s ease-in-out;
   }
 }
-
 .content-container {
   z-index: 10;
 }
-
 @keyframes fadeIn {
   0% {
     opacity: 0;
@@ -30,4 +29,22 @@
   100% {
     opacity: 1;
   }
+}
+
+/* Album page */
+@keyframes scaleIn {
+  0%,
+  100% {
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center center;
+  }
+}
+.scale-in {
+  animation-name: scaleIn;
+  animation-duration: 700ms;
+  animation-fill-mode: both;
+  animation-iteration-count: 1;
+}
+.photoswipe--custom {
+  --pswp-bg: white !important;
 }
