@@ -1,18 +1,15 @@
 import Link from 'next/link';
 import albums from './albums';
+import React from 'react';
 
-export function Nav() {
+export const Nav: React.FC = props => {
   return (
-    <nav>
-      <h1>
+    <nav {...props}>
+      <h1 className="font-bold mb-5">
         <Link href="/">Aaron Agarunov</Link>
       </h1>
 
-      <ul className="flex flex-col content-start tracking-tight ">
-        <li>
-          <Link href="/">Home</Link>
-        </li>
-
+      <ul className="flex flex-col content-start tracking-tight">
         {albums.map(album => {
           return (
             <li key={album.name} className="max-w-fit">
@@ -28,6 +25,6 @@ export function Nav() {
       </ul>
     </nav>
   );
-}
+};
 
 export default Nav;
