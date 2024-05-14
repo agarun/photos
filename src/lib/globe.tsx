@@ -1,14 +1,24 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import GlobeGL from 'react-globe.gl';
+import type { GlobeProps, GlobeMethods } from 'react-globe.gl';
 import { GeoJsonGeometry } from 'three-geojson-geometry';
 import { geoGraticule10 } from 'd3-geo';
 import * as topojson from 'topojson-client';
 import { useWindowSize } from '@/hooks/use-window-size';
 import albums, { types } from './albums';
 import Link from 'next/link';
+
+type Ref = CustomGlobeMethods | undefined; // Reference to globe instance
+type GlobeEl = React.MutableRefObject<Ref>; // React `ref` passed to globe element
+
+interface CustomGlobeMethods extends GlobeMethods {
+  controls(): ReturnType<GlobeMethods['controls']> & {
+    autoRotateForced: boolean;
+  };
+}
 
 type Ring = {
   lat: number;
@@ -61,11 +71,15 @@ function usePoints() {
   };
 }
 
-function useRings(globeElRef, setPointAltitude) {
-  const [activeAlbum, setActiveAlbum] = useState<typeof albums>();
+function useRings(
+  globeElRef: CustomGlobeMethods,
+  setPointAltitude: React.Dispatch<React.SetStateAction<number>>
+) {
+  const [activeAlbum, setActiveAlbum] = useState<undefined | typeof albums>();
 
   const [rings, setRings] = useState<Array<Ring>>([]);
-  const colorInterpolator = t => `rgba(255,100,50,${Math.sqrt(1 - t)})`;
+  const colorInterpolator = (t: number) =>
+    `rgba(255,100,50,${Math.sqrt(1 - t)})`;
 
   const [enterTimeoutId, setEnterTimeoutId] = useState<NodeJS.Timeout>();
   function handleMouseEnter({ lat, lng, name, type }) {
@@ -94,7 +108,7 @@ function useRings(globeElRef, setPointAltitude) {
         setPointAltitude(2);
 
         globeElRef.controls().autoRotateForced = true;
-        globeElRef.controls().autoRotateSpeed = 3 * DEFAULT_AUTOROTATE_SPEED;
+        globeElRef.controls().autoRotateSpeed = 3.7 * DEFAULT_AUTOROTATE_SPEED;
 
         setRings([
           {
@@ -112,7 +126,7 @@ function useRings(globeElRef, setPointAltitude) {
   function handleMouseLeave() {
     setPointAltitude(0.002);
 
-    setActiveAlbum();
+    setActiveAlbum(undefined);
 
     globeElRef.pointOfView(
       {
@@ -162,8 +176,9 @@ function useArcs() {
   return { arcs };
 }
 
-function useCustomLayer(globeElRef) {
-  const customLayerData = [...Array(500).keys()].map(() => ({
+function useCustomLayer(globeEl: GlobeEl) {
+  const numbers = Array.from(Array(500), (_, index) => index);
+  const customLayerData = numbers.map(() => ({
     lat: (Math.random() - 0.5) * 180,
     lng: (Math.random() - 0.5) * 360,
     alt: Math.random() * 1.4 + 0.1
@@ -177,11 +192,24 @@ function useCustomLayer(globeElRef) {
         transparent: true
       })
     );
-  const customThreeObjectUpdate = (object, objectData) =>
+  const customThreeObjectUpdate: GlobeProps['customThreeObjectUpdate'] = (
+    object,
+    objectData
+  ) => {
+    const typedObjectData = objectData as {
+      lat: number;
+      lng: number;
+      alt: number;
+    };
     Object.assign(
       object.position,
-      globeElRef?.getCoords(objectData.lat, objectData.lng, objectData.alt)
+      globeEl.current?.getCoords(
+        typedObjectData.lat,
+        typedObjectData.lng,
+        typedObjectData.alt
+      )
     );
+  };
 
   return {
     customLayerData,
@@ -190,16 +218,13 @@ function useCustomLayer(globeElRef) {
   };
 }
 
-const DEFAULT_AUTOROTATE_SPEED = 1.75;
+function useGlobeReady(globeEl: GlobeEl) {
+  const [globeReady, setGlobeReady] = useState(false);
 
-function Globe() {
-  // object config
-  const globeEl = useRef();
-  const globeElRef = globeEl.current;
-
+  // faster autoRotate speed over the ocean
   const autoRotateSpeed = () => {
-    if (globeElRef) {
-      const { lng } = globeElRef.pointOfView();
+    if (globeEl.current) {
+      const { lng } = globeEl.current.pointOfView();
       let newSpeed = DEFAULT_AUTOROTATE_SPEED;
 
       // [ [ longitude, speed multiplier ], ... ]
@@ -229,29 +254,36 @@ function Globe() {
         }
       }
       if (
-        !globeElRef.controls().autoRotateForced &&
+        !globeEl.current.controls().autoRotateForced &&
         newSpeed !== DEFAULT_AUTOROTATE_SPEED
       ) {
-        // faster over the ocean
-        globeElRef.controls().autoRotateSpeed = newSpeed;
+        globeEl.current.controls().autoRotateSpeed = newSpeed;
       }
     }
     requestAnimationFrame(autoRotateSpeed);
   };
 
-  const handleGlobeReady = () => {
-    globeElRef.controls().enabled = false;
+  useEffect(() => {
+    if (globeReady && globeEl.current) {
+      globeEl.current.controls().enabled = false;
 
-    globeElRef.controls().enableZoom = false;
+      globeEl.current.controls().enableZoom = false;
 
-    globeElRef.controls().autoRotate = true;
-    globeElRef.controls().autoRotateSpeed = DEFAULT_AUTOROTATE_SPEED;
+      globeEl.current.controls().autoRotate = true;
+      globeEl.current.controls().autoRotateSpeed = DEFAULT_AUTOROTATE_SPEED;
 
-    globeElRef.pointOfView({ lat: 30, lng: -30, altitude: 2 });
+      globeEl.current.pointOfView({ lat: 30, lng: -30, altitude: 2 });
 
-    autoRotateSpeed();
+      autoRotateSpeed();
+    }
+  }, [globeEl, globeReady]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return {
+    handleGlobeReady: () => setGlobeReady(true)
   };
-  // scene config
+}
+
+function useScene(globeElRef: Ref) {
   useEffect(() => {
     if (!globeElRef) return;
 
@@ -285,6 +317,19 @@ function Globe() {
     innerSphere.renderOrder = Number.MAX_SAFE_INTEGER;
     scene.add(innerSphere);
   }, [globeElRef]);
+}
+
+const DEFAULT_AUTOROTATE_SPEED = 1.75;
+
+function Globe() {
+  // object config
+  const globeEl = useRef<Ref>();
+  const globeElRef: Ref = globeEl.current;
+
+  const { handleGlobeReady } = useGlobeReady(globeEl);
+
+  // scene config
+  useScene(globeElRef);
 
   // land shapes
   const { landPolygons, polygonMaterial } = useLandPolygons();
@@ -294,7 +339,7 @@ function Globe() {
 
   // rings animation
   const { rings, colorInterpolator, handleMouseEnter, handleMouseLeave } =
-    useRings(globeElRef, setPointAltitude);
+    useRings(globeElRef as CustomGlobeMethods, setPointAltitude);
 
   // arcs animation
   const { arcs } = useArcs();
@@ -304,7 +349,7 @@ function Globe() {
 
   // stars in the background
   const { customLayerData, customThreeObject, customThreeObjectUpdate } =
-    useCustomLayer(globeElRef);
+    useCustomLayer(globeEl);
 
   return (
     <section className="globe-container">
@@ -349,11 +394,18 @@ function Globe() {
       <section
         className={`
           content-container text-3xl
-          mt-48 ml-36 m-24 2xl:ml-64`}
+          my-36 m-12
+          md:mt-48 md:ml-36 md:m-24
+          2xl:ml-64`}
       >
-        <h1 className="font-bold my-20">Aaron Agarunov</h1>
+        <h1 className="font-bold my-20 text-center md:text-left">
+          Aaron Agarunov
+        </h1>
 
-        <ul className="flex flex-col content-start tracking-tight ">
+        <ul
+          className={`flex flex-col items-center
+            md:items-start tracking-tight`}
+        >
           {albums.map(album => {
             return (
               <li
@@ -381,10 +433,12 @@ function Globe() {
       <footer
         className={`
           tracking-tight content
-          absolute bottom-0 right-0 flex justify-end
-          mr-36 mb-48 m-24 2xl:mr-64`}
+          absolute bottom-0 md:right-0 flex justify-end
+          m-24
+          md:mr-36 md:mb-48 md:m-24
+          2xl:mr-64`}
       >
-        <div className="text-3xl text-right">
+        <div className="text-3xl text-center md:text-right">
           <p className="m-0 p-0 mt-1">&copy; {new Date().getFullYear()}</p>
         </div>
       </footer>
