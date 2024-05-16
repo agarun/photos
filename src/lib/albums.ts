@@ -17,6 +17,7 @@ export const AlbumSchema = z.object({
   lng: z.number(),
   locations: z.array(
     z.object({
+      description: z.string().optional(),
       lat: z.number(),
       lng: z.number()
     })
@@ -35,12 +36,12 @@ const albums: Array<Album> = [
     lng: 139.65,
     locations: [
       {
-        // Kyoto
+        description: 'Kyoto',
         lat: 35.01,
         lng: 135.77
       },
       {
-        // Osaka
+        description: 'Osaka',
         lat: 34.69,
         lng: 135.5
       }
@@ -70,8 +71,8 @@ const albums: Array<Album> = [
     lat: 40.14,
     lng: 47.577,
     locations: [
-      // Tbilisi region was on this trip too
       {
+        description: 'Tbilisi',
         lat: 41.69,
         lng: 44.8015
       }
@@ -81,24 +82,29 @@ const albums: Array<Album> = [
   },
   {
     name: 'Europe' as AlbumName,
-    // Florence (base)
+    // Florence
     lat: 43.77,
     lng: 11.2577,
     locations: [
       {
-        // Rome
+        description: 'Rome',
         lat: 41.89,
         lng: 12.48
       },
       {
-        // Milan
+        description: 'Milan',
         lat: 45.47,
         lng: 9.18
       },
       {
-        // Barcelona
+        description: 'Barcelona',
         lat: 41.387,
         lng: 2.168
+      },
+      {
+        description: 'Venice',
+        lat: 45.44,
+        lng: 12.316
       }
     ],
     color: '#880808',
@@ -119,6 +125,41 @@ const albums: Array<Album> = [
     lat: 40.713,
     lng: -74,
     locations: [],
+    color: '#880808',
+    type: types.LOCATION
+  },
+  {
+    name: 'West' as AlbumName,
+    // Arizona
+    lat: 36.268,
+    lng: -112.35,
+    locations: [
+      {
+        description: 'Los Angeles',
+        lat: 34.05,
+        lng: -118.24
+      },
+      {
+        description: 'San Francisco',
+        lat: 37.775,
+        lng: -122.42
+      },
+      {
+        description: 'San Diego',
+        lat: 32.716,
+        lng: -117.16
+      },
+      {
+        description: 'Zion National Park',
+        lat: 37.3,
+        lng: -113.02
+      },
+      {
+        description: 'Bryce National Park',
+        lat: 37.3,
+        lng: -113.02
+      }
+    ],
     color: '#880808',
     type: types.LOCATION
   },
