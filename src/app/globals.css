@@ -8,6 +8,10 @@
   }
 }
 
+::selection {
+  background: #e5b3c3;
+}
+
 /* Homepage */
 .globe-container {
   & > div {

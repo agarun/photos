@@ -1,7 +1,6 @@
 import dynamic from 'next/dynamic';
 import { getPage } from '@/lib/api';
 import Nav from '@/lib/nav';
-import Canvas from '@/lib/canvas';
 
 const Masonry = dynamic(() => import('@/lib/masonry'), {
   ssr: false
@@ -20,9 +19,7 @@ async function Page({ params: { slug } }: { params: { slug: string } }) {
 
   return (
     <section className="flex my-20">
-      <div className="pl-20 pr-40 space-y-1">
-        <Canvas />
-
+      <div className="pt-10 pl-20 pr-40 space-y-1">
         <Nav />
       </div>
 
