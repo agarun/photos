@@ -64,10 +64,21 @@ function useLandPolygons() {
 
 function usePoints() {
   const [altitude, setAltitude] = useState(0.002);
+  const points = [];
+  const locations = albums.filter(album => album.type === types.LOCATION);
+  for (const album of locations) {
+    points.push(
+      { lat: album.lat, lng: album.lng },
+      ...album.locations.map(location => ({
+        lat: location.lat,
+        lng: location.lng
+      }))
+    );
+  }
   return {
     pointAltitude: altitude,
     setPointAltitude: setAltitude,
-    points: albums
+    points
   };
 }
 
@@ -99,7 +110,7 @@ function useRings(
         );
 
         globeElRef.controls().autoRotateForced = true;
-        globeElRef.controls().autoRotateSpeed = 0.75;
+        globeElRef.controls().autoRotateSpeed = 0.69;
 
         setRings([
           { lat, lng, maxR: 9, propagationSpeed: 0.88, repeatPeriod: 1777 }
@@ -229,14 +240,20 @@ function useGlobeReady(globeEl: GlobeEl) {
 
       // [ [ longitude, speed multiplier ], ... ]
       const gradientSteps = [
-        [165, 2],
-        [160, 1.825],
-        [155, 1.75],
+        // sppeed down
+        [175, 2],
+        [165, 1.88],
+        [160, 1.77],
+        [155, 1.65],
         [150, 1.5],
         [145, 1.25],
-        [-120, 2.25],
-        [-110, 1.75],
-        [-115, 1.5],
+
+        // speed up
+        [-160, 2.25],
+        [-140, 2.0],
+        [-120, 1.75],
+        [-110, 1.65],
+        [-115, 1.45],
         [-100, 1.35],
         [-95, 1.25],
         [-90, 1.15]
