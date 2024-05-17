@@ -4,7 +4,7 @@ import React from 'react';
 
 export const Nav: React.FC = props => {
   return (
-    <nav {...props}>
+    <nav className="text-lg" {...props}>
       <h1 className="font-bold mb-5">
         <Link href="/">Aaron Agarunov</Link>
       </h1>

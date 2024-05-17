@@ -1,6 +1,7 @@
 import dynamic from 'next/dynamic';
 import { getPage } from '@/lib/api';
 import Nav from '@/lib/nav';
+import Canvas from '@/lib/canvas';
 
 const Masonry = dynamic(() => import('@/lib/masonry'), {
   ssr: false
@@ -18,11 +19,17 @@ async function Page({ params: { slug } }: { params: { slug: string } }) {
   const photos = await getPage(capitalize(slug));
 
   return (
-    <div>
-      <Nav />
+    <section className="flex my-20">
+      <div className="pl-20 pr-40 space-y-1">
+        <Canvas />
 
-      <Masonry items={photos} />
-    </div>
+        <Nav />
+      </div>
+
+      <Masonry className="my-12" items={photos} />
+
+      <footer className="pl-20"></footer>
+    </section>
   );
 }
 
