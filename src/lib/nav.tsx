@@ -12,12 +12,12 @@ export const Nav: React.FC = props => {
       <ul className="flex flex-col content-start tracking-tight">
         {albums.map(album => {
           return (
-            <li key={album.name} className="max-w-fit">
+            <li key={album.title} className="max-w-fit">
               <Link
-                href={`/${album.name.toLowerCase()}`}
+                href={`/${album.title.toLowerCase()}`}
                 className="hover:text-gray-500"
               >
-                {album.name}
+                {album.title}
               </Link>
             </li>
           );

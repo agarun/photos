@@ -8,11 +8,11 @@ export const types = {
 export const HexSchema = z.string().regex(/^#([A-Fa-f0-9]{6})$/);
 export type Hex = z.infer<typeof HexSchema>;
 
-export const AlbumNameSchema = z.string().brand<'AlbumName'>();
-export type AlbumName = z.infer<typeof AlbumNameSchema>;
+export const AlbumTitleSchema = z.string().brand<'AlbumTitle'>();
+export type AlbumTitle = z.infer<typeof AlbumTitleSchema>;
 
 export const AlbumSchema = z.object({
-  name: AlbumNameSchema,
+  title: AlbumTitleSchema,
   lat: z.number(),
   lng: z.number(),
   locations: z.array(
@@ -30,7 +30,7 @@ export type Album = z.infer<typeof AlbumSchema>;
 // TODO(agarun): Move this data to the API when I've uploaded photos and transferred schemas
 const albums: Array<Album> = [
   {
-    name: 'Japan' as AlbumName,
+    title: 'Japan' as AlbumTitle,
     // Tokyo
     lat: 35.68,
     lng: 139.65,
@@ -50,7 +50,7 @@ const albums: Array<Album> = [
     type: types.LOCATION
   },
   {
-    name: 'Miami' as AlbumName,
+    title: 'Miami' as AlbumTitle,
     lat: 25.76,
     lng: -80.19,
     locations: [],
@@ -58,7 +58,7 @@ const albums: Array<Album> = [
     type: types.LOCATION
   },
   {
-    name: 'Curaçao' as AlbumName,
+    title: 'Curaçao' as AlbumTitle,
     lat: 12.17,
     lng: -68.99,
     locations: [],
@@ -66,7 +66,7 @@ const albums: Array<Album> = [
     type: types.LOCATION
   },
   {
-    name: 'Azerbaijan' as AlbumName,
+    title: 'Azerbaijan' as AlbumTitle,
     // Baku
     lat: 40.14,
     lng: 47.577,
@@ -81,7 +81,7 @@ const albums: Array<Album> = [
     type: types.LOCATION
   },
   {
-    name: 'Europe' as AlbumName,
+    title: 'Europe' as AlbumTitle,
     // Florence
     lat: 43.77,
     lng: 11.2577,
@@ -111,7 +111,7 @@ const albums: Array<Album> = [
     type: types.LOCATION
   },
   {
-    name: 'New Jersey' as AlbumName,
+    title: 'New Jersey' as AlbumTitle,
     // Metuchen
     lat: 40.54,
     lng: -74.36,
@@ -120,7 +120,7 @@ const albums: Array<Album> = [
     type: types.LOCATION
   },
   {
-    name: 'New York' as AlbumName,
+    title: 'New York' as AlbumTitle,
     // Generic NYC
     lat: 40.713,
     lng: -74,
@@ -129,7 +129,7 @@ const albums: Array<Album> = [
     type: types.LOCATION
   },
   {
-    name: 'West' as AlbumName,
+    title: 'West' as AlbumTitle,
     // Arizona
     lat: 36.268,
     lng: -112.35,
@@ -164,7 +164,7 @@ const albums: Array<Album> = [
     type: types.LOCATION
   },
   {
-    name: 'Music' as AlbumName,
+    title: 'Music' as AlbumTitle,
     lat: 0,
     lng: 0,
     locations: [],

@@ -8,7 +8,7 @@ import { GeoJsonGeometry } from 'three-geojson-geometry';
 import { geoGraticule10 } from 'd3-geo';
 import * as topojson from 'topojson-client';
 import { useWindowSize } from '@/hooks/use-window-size';
-import albums, { types } from './albums';
+import albums, { Album, types } from './albums';
 import Link from 'next/link';
 
 type Ref = CustomGlobeMethods | undefined; // Reference to globe instance
@@ -86,14 +86,14 @@ function useRings(
   globeElRef: CustomGlobeMethods,
   setPointAltitude: React.Dispatch<React.SetStateAction<number>>
 ) {
-  const [activeAlbum, setActiveAlbum] = useState<undefined | typeof albums>();
+  const [activeAlbum, setActiveAlbum] = useState<Array<Album>>();
 
   const [rings, setRings] = useState<Array<Ring>>([]);
   const colorInterpolator = (t: number) =>
     `rgba(255,100,50,${Math.sqrt(1 - t)})`;
 
   const [enterTimeoutId, setEnterTimeoutId] = useState<NodeJS.Timeout>();
-  function handleMouseEnter({ lat, lng, name, type }) {
+  function handleMouseEnter({ lat, lng, name, type }: Album) {
     setActiveAlbum(name);
 
     clearTimeout(enterTimeoutId);
@@ -426,7 +426,7 @@ function Globe() {
           {albums.map(album => {
             return (
               <li
-                key={album.name}
+                key={album.title}
                 className="max-w-fit"
                 onMouseEnter={() => {
                   handleMouseEnter(album);
@@ -436,10 +436,10 @@ function Globe() {
                 }}
               >
                 <Link
-                  href={`/${album.name.toLowerCase()}`}
+                  href={`/${album.title.toLowerCase()}`}
                   className="hover:text-gray-500"
                 >
-                  {album.name}
+                  {album.title}
                 </Link>
               </li>
             );

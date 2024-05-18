@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import { getPage } from '@/lib/api';
+import { getAlbum } from '@/lib/api';
 import Nav from '@/lib/nav';
 
 const Masonry = dynamic(() => import('@/lib/masonry'), {
@@ -15,7 +15,7 @@ export async function generateStaticParams() {
 }
 
 async function Page({ params: { slug } }: { params: { slug: string } }) {
-  const photos = await getPage(capitalize(slug));
+  const photos = await getAlbum(capitalize(slug));
 
   return (
     <section className="flex my-20">
