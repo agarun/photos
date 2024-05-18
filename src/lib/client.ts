@@ -84,20 +84,21 @@ export class BaseClient {
   }
 }
 
+const PhotoSchema = z.object({
+  size: z.number(),
+  url: z.string(),
+  width: z.number(),
+  height: z.number()
+});
+export type Photo = z.infer<typeof PhotoSchema>;
+
 const ContentfulPhotoGallerySchema = z.object({
   data: z.object({
     photoGalleryCollection: z.object({
       items: z.array(
         AlbumSchema.extend({
           photosCollection: z.object({
-            items: z.array(
-              z.object({
-                size: z.number(),
-                url: z.string(),
-                width: z.number(),
-                height: z.number()
-              })
-            )
+            items: z.array(PhotoSchema)
           })
         })
       )
@@ -154,7 +155,8 @@ query {
       const photos = album.photosCollection.items;
       return photos;
     } else {
-      return response;
+      const error = response as Error;
+      throw new Error(error.message);
     }
   }
 

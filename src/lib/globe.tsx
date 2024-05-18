@@ -8,7 +8,7 @@ import { GeoJsonGeometry } from 'three-geojson-geometry';
 import { geoGraticule10 } from 'd3-geo';
 import * as topojson from 'topojson-client';
 import { useWindowSize } from '@/hooks/use-window-size';
-import albums, { Album, types } from './albums';
+import albums, { Album, AlbumTitle, types } from './albums';
 import Link from 'next/link';
 
 type Ref = CustomGlobeMethods | undefined; // Reference to globe instance
@@ -86,15 +86,15 @@ function useRings(
   globeElRef: CustomGlobeMethods,
   setPointAltitude: React.Dispatch<React.SetStateAction<number>>
 ) {
-  const [activeAlbum, setActiveAlbum] = useState<Array<Album>>();
+  const [activeAlbum, setActiveAlbum] = useState<AlbumTitle>();
 
   const [rings, setRings] = useState<Array<Ring>>([]);
   const colorInterpolator = (t: number) =>
     `rgba(255,100,50,${Math.sqrt(1 - t)})`;
 
   const [enterTimeoutId, setEnterTimeoutId] = useState<NodeJS.Timeout>();
-  function handleMouseEnter({ lat, lng, name, type }: Album) {
-    setActiveAlbum(name);
+  function handleMouseEnter({ lat, lng, title, type }: Album) {
+    setActiveAlbum(title);
 
     clearTimeout(enterTimeoutId);
 
