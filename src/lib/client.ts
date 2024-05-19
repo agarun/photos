@@ -1,24 +1,13 @@
 import { z } from 'zod';
-import { AlbumSchema } from './albums';
+import {
+  Config,
+  ErrorResponse,
+  SuccessResponse,
+  AlbumPhotosResponseSchema,
+  AlbumResponseSchema
+} from '@/types/api';
 
-type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-
-type ResponseDetail = {
-  success: boolean;
-};
-
-type Error = {
-  success: false;
-  message: string;
-  error?: z.ZodError | string;
-};
-
-type Config = {
-  method?: Method;
-  timeout?: number;
-  preview?: boolean;
-  headers?: Record<string, string>;
-} & globalThis.RequestInit;
+const defaultBaseUrl = `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`;
 
 function authorizationHeader(preview: boolean | undefined): string {
   return `Bearer ${
@@ -28,10 +17,8 @@ function authorizationHeader(preview: boolean | undefined): string {
   }`;
 }
 
-const url = `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`;
-
 export class BaseClient {
-  constructor(protected baseUrl: string = url) {
+  constructor(protected baseUrl: string = defaultBaseUrl) {
     this.baseUrl = baseUrl;
   }
 
@@ -39,7 +26,9 @@ export class BaseClient {
     requestSchema: z.ZodSchema<Request>,
     responseSchema: z.ZodSchema<Response>,
     config: Config
-  ): Promise<(Response & ResponseDetail) | Error> {
+  ): Promise<
+    (z.infer<z.ZodSchema<Response>> & SuccessResponse) | ErrorResponse
+  > {
     const controller = new AbortController();
     const { signal } = controller;
 
@@ -63,11 +52,11 @@ export class BaseClient {
 
       const data = await response.json();
 
-      console.log({ data });
       responseSchema.parse(data);
 
       return { ...data, success: true };
     } catch (error) {
+      console.error(error);
       if (error instanceof z.ZodError) {
         return { success: false, message: error.message, error };
       }
@@ -83,28 +72,6 @@ export class BaseClient {
     }
   }
 }
-
-const PhotoSchema = z.object({
-  size: z.number(),
-  url: z.string(),
-  width: z.number(),
-  height: z.number()
-});
-export type Photo = z.infer<typeof PhotoSchema>;
-
-const ContentfulPhotoGallerySchema = z.object({
-  data: z.object({
-    photoGalleryCollection: z.object({
-      items: z.array(
-        AlbumSchema.extend({
-          photosCollection: z.object({
-            items: z.array(PhotoSchema)
-          })
-        })
-      )
-    })
-  })
-});
 
 export class Client extends BaseClient {
   albums = new AlbumClient(this.baseUrl);
@@ -140,24 +107,12 @@ query {
   }
 }`;
 
-    const response = await this.request(
-      z.string(),
-      ContentfulPhotoGallerySchema,
-      {
-        method: 'POST',
-        body: JSON.stringify({ query }),
-        next: { tags: ['photos'] }
-      }
-    );
-
-    if (response.success) {
-      const album = response.data.photoGalleryCollection.items[0];
-      const photos = album.photosCollection.items;
-      return photos;
-    } else {
-      const error = response as Error;
-      throw new Error(error.message);
-    }
+    const response = await this.request(z.string(), AlbumPhotosResponseSchema, {
+      method: 'POST',
+      body: JSON.stringify({ query }),
+      next: { tags: ['photos'] }
+    });
+    return response;
   }
 
   async get() {
@@ -176,21 +131,11 @@ query {
   }
 }`;
 
-    const response = await this.request(
-      z.void(),
-      ContentfulPhotoGallerySchema,
-      {
-        method: 'POST',
-        body: JSON.stringify({ query }),
-        next: { tags: ['photos'] }
-      }
-    );
-
-    if (response.success) {
-      const albums = response.data.photoGalleryCollection.items;
-      return albums;
-    } else {
-      return response;
-    }
+    const response = await this.request(z.string(), AlbumResponseSchema, {
+      method: 'POST',
+      body: JSON.stringify({ query }),
+      next: { tags: ['photos'], revalidate: false }
+    });
+    return response;
   }
 }

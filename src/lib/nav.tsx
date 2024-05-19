@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import albums from './albums';
+import { AlbumList } from '../types/albums';
 import React from 'react';
 
-export const Nav: React.FC = props => {
+export const Nav: React.FC<{ albums: AlbumList }> = ({ albums, ...props }) => {
   return (
     <nav className="text-lg" {...props}>
       <h1 className="font-bold mb-5">
@@ -16,6 +16,7 @@ export const Nav: React.FC = props => {
               <Link
                 href={`/${album.title.toLowerCase()}`}
                 className="hover:text-gray-500"
+                prefetch={false}
               >
                 {album.title}
               </Link>

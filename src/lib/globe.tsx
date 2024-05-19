@@ -8,7 +8,7 @@ import { GeoJsonGeometry } from 'three-geojson-geometry';
 import { geoGraticule10 } from 'd3-geo';
 import * as topojson from 'topojson-client';
 import { useWindowSize } from '@/hooks/use-window-size';
-import albums, { Album, AlbumTitle, types } from './albums';
+import { Album, AlbumTitle, types } from '../types/albums';
 import Link from 'next/link';
 
 type Ref = CustomGlobeMethods | undefined; // Reference to globe instance
@@ -62,7 +62,7 @@ function useLandPolygons() {
   return { landPolygons, polygonMaterial };
 }
 
-function usePoints() {
+function usePoints(albums: Array<Album>) {
   const [altitude, setAltitude] = useState(0.002);
   const points = [];
   const locations = albums.filter(album => album.type === types.LOCATION);
@@ -162,7 +162,7 @@ function useRings(
   };
 }
 
-function generateArcs() {
+function generateArcs(albums: Array<Album>) {
   const data = [];
   for (let i = 0; i < albums.length; i++) {
     for (let j = i + 1; j < albums.length; j++) {
@@ -178,11 +178,11 @@ function generateArcs() {
   return data;
 }
 
-function useArcs() {
+function useArcs(albums: Array<Album>) {
   const [arcs, setArcs] = useState<Array<Arc>>([]);
   useEffect(() => {
-    setArcs(generateArcs());
-  }, []);
+    setArcs(generateArcs(albums));
+  }, [albums]);
 
   return { arcs };
 }
@@ -338,7 +338,7 @@ function useScene(globeElRef: Ref) {
 
 const DEFAULT_AUTOROTATE_SPEED = 1.75;
 
-function Globe() {
+function Globe({ albums }: { albums: Array<Album> }) {
   // object config
   const globeEl = useRef<Ref>();
   const globeElRef: Ref = globeEl.current;
@@ -352,14 +352,14 @@ function Globe() {
   const { landPolygons, polygonMaterial } = useLandPolygons();
 
   // `albums` map points
-  const { points, pointAltitude, setPointAltitude } = usePoints();
+  const { points, pointAltitude, setPointAltitude } = usePoints(albums);
 
   // rings animation
   const { rings, colorInterpolator, handleMouseEnter, handleMouseLeave } =
     useRings(globeElRef as CustomGlobeMethods, setPointAltitude);
 
   // arcs animation
-  const { arcs } = useArcs();
+  const { arcs } = useArcs(albums);
 
   // resize canvas on resize viewport
   const { width, height } = useWindowSize();
