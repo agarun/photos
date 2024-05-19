@@ -27,6 +27,9 @@ export const AlbumSchema = z.object({
 });
 export type Album = z.infer<typeof AlbumSchema>;
 
+const AlbumListSchema = z.array(AlbumSchema);
+export type AlbumList = z.infer<typeof AlbumListSchema>;
+
 // TODO(agarun): Move this data to the API when I've uploaded photos and transferred schemas
 const albums: Array<Album> = [
   {

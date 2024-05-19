@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import { getAlbum } from '@/lib/api';
+import { getAlbum, getAlbums } from '@/lib/api';
 import Nav from '@/lib/nav';
 
 const Masonry = dynamic(() => import('@/lib/masonry'), {
@@ -11,19 +11,21 @@ function capitalize(string: string): string {
 }
 
 export async function generateStaticParams() {
-  return [{ slug: 'azerbaijan' }];
+  const albums = await getAlbums();
+  return albums.map(album => ({ slug: album.title.toLowerCase() }));
 }
 
 async function Page({ params: { slug } }: { params: { slug: string } }) {
-  const photos = await getAlbum(capitalize(slug));
+  const albums = await getAlbums();
+  const albumPhotos = await getAlbum(capitalize(slug));
 
   return (
-    <section className="flex my-20">
+    <section className="flex flex-col md:flex-row my-20">
       <div className="pt-10 pl-20 pr-40 space-y-1">
-        <Nav />
+        <Nav albums={albums} />
       </div>
 
-      <Masonry className="my-12" items={photos} />
+      <Masonry className="my-12" items={albumPhotos} />
 
       <footer className="pl-20"></footer>
     </section>
