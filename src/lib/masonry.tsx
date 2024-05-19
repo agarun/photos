@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Masonry as MasonicMasonry } from 'masonic';
 import { useLightbox } from '../hooks/use-lightbox';
-import { Photo } from './client';
+import { Photo } from '@/types';
 
 const MasonryItem = ({ data: { url, width, height } }: { data: Photo }) => (
   <a
@@ -13,7 +13,7 @@ const MasonryItem = ({ data: { url, width, height } }: { data: Photo }) => (
     target="_blank"
     rel="noreferrer"
   >
-    <img className="scale-in" src={url} />
+    <img className="scale-in" src={url} alt="" />
   </a>
 );
 
