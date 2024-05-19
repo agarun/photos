@@ -20,7 +20,7 @@
     left: 0;
     pointer-events: none;
     z-index: -10;
-    animation: fadeIn 3s ease-in-out;
+    animation: fadeIn 5s ease-in-out;
   }
 }
 .content-container {
