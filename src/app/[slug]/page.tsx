@@ -22,7 +22,7 @@ async function Page({ params: { slug } }: { params: { slug: string } }) {
   return (
     <section className="flex flex-col md:flex-row my-20">
       <div className="pt-10 pl-20 pr-40 space-y-1">
-        <Nav albums={albums} />
+        <Nav albums={albums} currentAlbum={slug} />
       </div>
 
       <Masonry className="my-12" items={albumPhotos} />
