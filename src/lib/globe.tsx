@@ -68,10 +68,11 @@ function usePoints(albums: Array<Album>) {
   const locations = albums.filter(album => album.type === types.LOCATION);
   for (const album of locations) {
     points.push(
-      { lat: album.lat, lng: album.lng },
+      { lat: album.lat, lng: album.lng, radius: 0.19 },
       ...album.locations.map(location => ({
         lat: location.lat,
-        lng: location.lng
+        lng: location.lng,
+        radius: 0.144
       }))
     );
   }
@@ -391,7 +392,7 @@ function Globe({ albums }: { albums: Array<Album> }) {
         pointsData={points}
         pointColor={() => 'rgba(255, 0, 0, 0.75)'}
         pointAltitude={pointAltitude}
-        pointRadius={0.19}
+        pointRadius={point => (point as { radius: number }).radius}
         pointsMerge={true}
         ringsData={rings}
         ringColor={() => colorInterpolator}
