@@ -31,7 +31,7 @@ export const Masonry = ({
   }
 
   return (
-    <section id="gallery" className="max-w-[800px]">
+    <section id="gallery" className="h-full w-[1000px]">
       <MasonicMasonry
         items={items}
         render={MasonryItem}
