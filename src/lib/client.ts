@@ -89,7 +89,8 @@ query {
       description
       lat
       lng
-      locations 
+      locations
+      order
       photosCollection {
         items {
           size
