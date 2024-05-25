@@ -16,7 +16,9 @@ export async function getAlbums() {
   const client = new Client();
   const data = await client.albums.get();
   if (data.success) {
-    return data.data.photoGalleryCollection.items as unknown as Array<Album>;
+    const albums = data.data.photoGalleryCollection
+      .items as unknown as Array<Album>;
+    return [...albums].sort((a, b) => a.order - b.order);
   }
   throw new Error('Failed to fetch albums.');
 }

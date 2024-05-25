@@ -84,12 +84,12 @@ query {
   photoGalleryCollection(where: { title: "${slug}" }) {
     items {
       title
+      color
+      type
       description
       lat
       lng
-      color
-      type
-      locations
+      locations 
       photosCollection {
         items {
           size
@@ -121,12 +121,13 @@ query {
   photoGalleryCollection {
     items {
       title
+      color
+      type
       description
       lat
       lng
-      color
-      type
       locations
+      order
     }
   }
 }`;
