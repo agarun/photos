@@ -6,8 +6,10 @@ const Masonry = dynamic(() => import('@/lib/masonry'), {
   ssr: false
 });
 
-function capitalize(string: string): string {
-  return string[0].toUpperCase() + string.slice(1).toLowerCase();
+function slugToAlbumTitle(string: string): string {
+  const capitalize = (string: string) =>
+    string[0].toUpperCase() + string.slice(1).toLowerCase();
+  return string.split('%20').map(capitalize).join(' ');
 }
 
 export async function generateStaticParams() {
@@ -17,12 +19,12 @@ export async function generateStaticParams() {
 
 async function Page({ params: { slug } }: { params: { slug: string } }) {
   const albums = await getAlbums();
-  const albumPhotos = await getAlbum(capitalize(slug));
+  const albumPhotos = await getAlbum(slugToAlbumTitle(slug));
 
   return (
     <section className="flex flex-col md:flex-row my-20">
       <div className="pt-10 pl-20 pr-40 space-y-1">
-        <Nav albums={albums} currentAlbum={slug} />
+        <Nav albums={albums} slug={slug} />
       </div>
 
       <Masonry className="my-12" items={albumPhotos} />
