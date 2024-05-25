@@ -72,7 +72,7 @@ function usePoints(albums: Array<Album>) {
       ...album.locations.map(location => ({
         lat: location.lat,
         lng: location.lng,
-        radius: 0.144
+        radius: 0.135
       }))
     );
   }
