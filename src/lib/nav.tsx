@@ -2,9 +2,9 @@ import Link from 'next/link';
 import { AlbumList } from '../types/albums';
 import React from 'react';
 
-export const Nav: React.FC<{ currentAlbum: string; albums: AlbumList }> = ({
+export const Nav: React.FC<{ slug: string; albums: AlbumList }> = ({
   albums,
-  currentAlbum,
+  slug,
   ...props
 }) => {
   return (
@@ -16,7 +16,8 @@ export const Nav: React.FC<{ currentAlbum: string; albums: AlbumList }> = ({
       <ul className="flex flex-col content-start tracking-tight">
         {albums.map(album => {
           const isActive =
-            currentAlbum.toLowerCase() === album.title.toLowerCase();
+            slug.replace(/%20/g, ' ').toLowerCase() ===
+            album.title.toLowerCase();
           return (
             <li key={album.title} className="max-w-fit">
               <Link
