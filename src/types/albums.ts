@@ -14,11 +14,13 @@ export type AlbumTitle = z.infer<typeof AlbumTitleSchema>;
 export const AlbumSchema = z.object({
   title: AlbumTitleSchema,
   description: z.string().nullable(),
+  date: z.string().nullable(),
   lat: z.number(),
   lng: z.number(),
   locations: z.array(
     z.object({
       description: z.string().optional(),
+      date: z.string().optional(),
       lat: z.number(),
       lng: z.number()
     })
