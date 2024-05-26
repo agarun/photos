@@ -7,7 +7,7 @@ export async function getAlbum(slug: string) {
   if (data.success) {
     const album = data.data.photoGalleryCollection.items[0];
     const photos = album.photosCollection.items as unknown as Array<Photo>;
-    return photos;
+    return { album, photos };
   }
   throw new Error('Failed to fetch album.');
 }

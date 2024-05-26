@@ -91,6 +91,7 @@ query {
       lng
       locations
       order
+      date
       photosCollection {
         items {
           size
@@ -125,6 +126,7 @@ query {
       color
       type
       description
+      date
       lat
       lng
       locations
