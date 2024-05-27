@@ -369,13 +369,17 @@ function Globe({ albums }: { albums: Array<Album> }) {
   const { customLayerData, customThreeObject, customThreeObjectUpdate } =
     useCustomLayer(globeEl);
 
+  const isMac =
+    navigator.platform.toLowerCase().includes('mac') ||
+    navigator.userAgent.toLowerCase().includes('mac');
+
   return (
     <section className="globe-container">
       <GlobeGL
         ref={globeEl}
         width={width}
         height={height}
-        rendererConfig={{ antialias: true }} // `false` yields much better perf
+        rendererConfig={{ antialias: true }} // `false` yields much better performance
         onGlobeReady={handleGlobeReady}
         animateIn={false}
         backgroundColor="rgba(0,0,0,0)"
@@ -388,7 +392,7 @@ function Globe({ albums }: { albums: Array<Album> }) {
         polygonsTransitionDuration={0}
         polygonAltitude={() => 0}
         polygonSideColor={() => 'rgba(255, 255, 255, 0)'}
-        polygonStrokeColor={() => 'darkslategray'}
+        polygonStrokeColor={() => (isMac ? 'black' : 'darkslategray')} // compensate for platform's polygon rendering differences
         pointsData={points}
         pointColor={() => 'rgba(255, 0, 0, 0.75)'}
         pointAltitude={pointAltitude}
@@ -451,9 +455,8 @@ function Globe({ albums }: { albums: Array<Album> }) {
       <footer
         className={`
           tracking-tight content
-          absolute bottom-0 md:right-0 flex justify-end
           m-24
-          md:mr-36 md:mb-48 md:m-24
+          md:mr-36
           2xl:mr-64`}
       >
         <div className="text-3xl text-center md:text-right">
