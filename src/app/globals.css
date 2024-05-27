@@ -8,11 +8,12 @@
   }
 }
 
+/* Text highlighting */
 ::selection {
   background: #e5b3c3;
 }
 
-/* Homepage */
+/* `Globe` components */
 .globe-container {
   & > div {
     position: absolute;
@@ -26,6 +27,11 @@
 .content-container {
   z-index: 10;
 }
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 2.5s ease-in-out;
+}
 @keyframes fadeIn {
   0% {
     opacity: 0;
@@ -34,21 +40,41 @@
     opacity: 1;
   }
 }
-
-/* Album page */
+.blink {
+  animation: blink 1s step-start infinite;
+  pointer-events: none;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
 @keyframes scaleIn {
   0%,
   100% {
     animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transform-origin: center center;
   }
+
+  0% {
+    opacity: 0;
+    transform: matrix(0.92, 0, 0, 0.92, 0, 0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: matrix(1, 0, 0, 1, 0, 0);
+  }
 }
 .scale-in {
   animation-name: scaleIn;
-  animation-duration: 700ms;
+  animation-duration: 650ms;
   animation-fill-mode: both;
   animation-iteration-count: 1;
+  animation-delay: 150ms;
 }
+
+/* Lightbox */
 .photoswipe--custom {
   --pswp-bg: white !important;
 }
