@@ -1,7 +1,7 @@
 import { getAlbums } from '@/lib/api';
-import Globe from '@/lib/cobe-globe';
+import Globe from '@/lib/globes/mini-globe';
 import Nav from '@/lib/nav';
-import Noise from '@/lib/noise';
+import Noise from '@/lib/fx/noise';
 import { ExternalLink } from '@/lib/external-link';
 
 export async function generateStaticParams() {
