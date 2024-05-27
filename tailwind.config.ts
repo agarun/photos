@@ -11,7 +11,11 @@ const config: Config = {
     fontFamily: {
       sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui']
     },
-    extend: {}
+    extend: {
+      spacing: {
+        '2.5': '0.875rem'
+      }
+    }
   },
   plugins: []
 };
