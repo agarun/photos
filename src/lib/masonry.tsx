@@ -13,7 +13,11 @@ const MasonryItem = ({ data: { url, width, height } }: { data: Photo }) => (
     target="_blank"
     rel="noreferrer"
   >
-    <img className="scale-in" src={url} alt="" />
+    <img
+      className="scale-in transition-opacity ease-in duration-500"
+      src={url}
+      alt=""
+    />
   </a>
 );
 
@@ -31,11 +35,14 @@ export const Masonry = ({
   }
 
   return (
-    <section id="gallery" className="h-full w-[1000px]">
+    <section
+      id="gallery"
+      className="h-full w-full md:w-[500px] lg:w-[720px] xl:w-[1000px] px-2 sm:p-0"
+    >
       <MasonicMasonry
         items={items}
         render={MasonryItem}
-        columnGutter={18}
+        columnGutter={18} // should be 9 when 1 col
         columnWidth={250}
         overscanBy={2}
         {...props}
