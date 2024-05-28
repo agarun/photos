@@ -42,7 +42,7 @@ export const Masonry = ({
       <MasonicMasonry
         items={items}
         render={MasonryItem}
-        columnGutter={18} // should be 9 when 1 col
+        columnGutter={window.innerWidth <= 512 ? 9 : 18}
         columnWidth={250}
         overscanBy={2}
         {...props}
