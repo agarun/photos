@@ -8,7 +8,7 @@ import { GeoJsonGeometry } from 'three-geojson-geometry';
 import { geoGraticule10 } from 'd3-geo';
 import * as topojson from 'topojson-client';
 import { useWindowSize } from '@/hooks/use-window-size';
-import { Album, AlbumTitle, types } from '../types/albums';
+import { Album, AlbumTitle, types } from '../../types/albums';
 import Link from 'next/link';
 
 type Ref = CustomGlobeMethods | undefined; // Reference to globe instance
@@ -44,7 +44,7 @@ function useLandPolygons() {
   const [landPolygons, setLandPolygons] = useState([]);
   useEffect(() => {
     async function fetchLandPolygons() {
-      const landTopo = await import('../data/land-110m.json');
+      const landTopo = await import('../../data/land-110m.json');
       const landPolygons = topojson.feature(
         landTopo,
         landTopo.objects.land

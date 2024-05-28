@@ -2,7 +2,7 @@ import dynamic from 'next/dynamic';
 import './globals.css';
 import { getAlbums } from '@/lib/api';
 
-const Globe = dynamic(() => import('@/lib/globe'), {
+const Globe = dynamic(() => import('@/lib/globes/globe'), {
   ssr: false
 });
 
