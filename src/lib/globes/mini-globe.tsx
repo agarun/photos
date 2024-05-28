@@ -110,7 +110,11 @@ export default function Globe({
       onRender
     });
 
-    setTimeout(() => (canvasRef.current!.style.opacity = '0.85'));
+    setTimeout(
+      () =>
+        (canvasRef.current!.style.opacity =
+          window.innerWidth <= 640 ? '0.5' : '0.85')
+    );
     return () => globe.destroy();
   }, [canvasRef]);
 

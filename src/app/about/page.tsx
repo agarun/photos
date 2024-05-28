@@ -53,7 +53,7 @@ async function AboutPage() {
 
   return (
     <section
-      className={`flex flex-col md:flex-row
+      className={`flex flex-col sm:flex-row
         pt-10 sm:pt-5 sm:pb-5
         h-lvh max-sm:h-full max-sm:overflow-y-auto`}
     >
@@ -90,8 +90,9 @@ async function AboutPage() {
 
         <Globe
           albums={albums}
-          className={`-bottom-72 -right-48 max-w-[1024px]
-            fade-in max-sm:opacity-25`}
+          className={`-bottom-72 -right-48 max-sm:-bottom-36 max-sm:-right-40
+            max-w-[1024px] max-sm:w-[768px]
+            fade-in`}
         />
         {/* Overlap Globe to fade in the edges */}
         <div
