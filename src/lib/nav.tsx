@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { AlbumList, AlbumTitle } from '../types/albums';
 import React from 'react';
 import { GlobeIcon, InfoIcon, SocialIcon } from './icons';
+import { albumTitleToSlug } from './api/slug';
 
 export const Nav: React.FC<{
   title?: AlbumTitle;
@@ -24,7 +25,7 @@ export const Nav: React.FC<{
           return (
             <li key={album.title} className="max-w-fit">
               <Link
-                href={`/${album.title.toLowerCase()}`}
+                href={`/${albumTitleToSlug(album.title)}`}
                 className={isActive ? 'font-bold' : 'hover:text-gray-500'}
                 prefetch={false}
               >

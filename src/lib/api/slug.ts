@@ -5,8 +5,12 @@ const capitalize = (string: string) =>
 
 export function slugToAlbumTitle(string: string): AlbumTitle {
   return string
-    .split('%20')
+    .split('-')
     .map(capitalize)
     .map(string => string.replace(/%c3%a7/g, 'ç'))
     .join(' ') as AlbumTitle;
+}
+
+export function albumTitleToSlug(title: AlbumTitle): string {
+  return title.toLowerCase().split(' ').join('-');
 }
