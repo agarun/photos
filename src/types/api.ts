@@ -50,3 +50,11 @@ export const AlbumPhotosResponseSchema = z.object({
     })
   })
 });
+
+export const AssetsResponseSchema = z.object({
+  data: z.object({
+    assetCollection: z.object({
+      items: z.array(PhotoSchema)
+    })
+  })
+});

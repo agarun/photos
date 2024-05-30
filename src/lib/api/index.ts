@@ -22,3 +22,13 @@ export async function getAlbums() {
   }
   throw new Error('Failed to fetch albums.');
 }
+
+export async function getPhotos(tag: string) {
+  const client = new Client();
+  const data = await client.photos.findBy(tag);
+  if (data.success) {
+    const photos = data.data.assetCollection.items as unknown as Array<Photo>;
+    return photos;
+  }
+  throw new Error('Failed to fetch albums.');
+}

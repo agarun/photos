@@ -4,7 +4,8 @@ import {
   ErrorResponse,
   SuccessResponse,
   AlbumPhotosResponseSchema,
-  AlbumResponseSchema
+  AlbumResponseSchema,
+  AssetsResponseSchema
 } from '@/types/api';
 
 const defaultBaseUrl = `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`;
@@ -75,6 +76,7 @@ export class BaseClient {
 
 export class Client extends BaseClient {
   albums = new AlbumClient(this.baseUrl);
+  photos = new PhotoClient(this.baseUrl);
 }
 
 export class AlbumClient extends BaseClient {
@@ -112,7 +114,7 @@ query {
     const response = await this.request(z.string(), AlbumPhotosResponseSchema, {
       method: 'POST',
       body: JSON.stringify({ query }),
-      next: { tags: ['photos'] }
+      next: { tags: ['albums', 'photos'] }
     });
     return response;
   }
@@ -138,7 +140,37 @@ query {
     const response = await this.request(z.string(), AlbumResponseSchema, {
       method: 'POST',
       body: JSON.stringify({ query }),
-      next: { tags: ['photos'], revalidate: false }
+      next: { tags: ['albums'], revalidate: false }
+    });
+    return response;
+  }
+}
+
+export class PhotoClient extends BaseClient {
+  async findBy(tag: string) {
+    const query = `
+query($tag: String!) {
+  assetCollection(
+    where: {
+      OR: [
+        { contentfulMetadata: { tags: { id_contains_all: [$tag] } } },
+        { title_contains: $tag }
+      ]
+    }
+  ) {
+    items {
+      size
+      url
+      width
+      height
+    }
+  }
+}`;
+
+    const response = await this.request(z.string(), AssetsResponseSchema, {
+      method: 'POST',
+      body: JSON.stringify({ query, variables: { tag } }),
+      next: { tags: ['photos'] }
     });
     return response;
   }
