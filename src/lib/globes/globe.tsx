@@ -376,11 +376,12 @@ function Globe({ albums }: { albums: Array<Album> }) {
   return (
     <section
       className={`globe-container
-        py-64
-        md:px-24
-        lg:px-36
-        2xl:px-64
-        `}
+        py-36
+        sm:py-36
+        md:py-32 md:px-24
+        lg:py-40 lg:px-36
+        xl:py-64 xl:px-48
+        2xl:px-64`}
     >
       <GlobeGL
         ref={globeEl}
