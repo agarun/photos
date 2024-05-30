@@ -374,7 +374,14 @@ function Globe({ albums }: { albums: Array<Album> }) {
     navigator.userAgent.toLowerCase().includes('mac');
 
   return (
-    <section className="globe-container">
+    <section
+      className={`globe-container
+        py-64
+        md:px-24
+        lg:px-36
+        2xl:px-64
+        `}
+    >
       <GlobeGL
         ref={globeEl}
         width={width}
@@ -413,14 +420,8 @@ function Globe({ albums }: { albums: Array<Album> }) {
         customThreeObjectUpdate={customThreeObjectUpdate}
       />
 
-      <section
-        className={`
-          content-container text-3xl
-          my-36 m-12
-          md:mt-48 md:ml-36 md:m-24
-          2xl:ml-64`}
-      >
-        <h1 className="font-bold my-20 text-center md:text-left">
+      <section className={`content-container grow text-3xl`}>
+        <h1 className="font-bold mb-20 text-center md:text-left">
           Aaron Agarunov
         </h1>
 
@@ -452,15 +453,9 @@ function Globe({ albums }: { albums: Array<Album> }) {
         </ul>
       </section>
 
-      <footer
-        className={`
-          tracking-tight content
-          m-24
-          md:mr-36
-          2xl:mr-64`}
-      >
+      <footer className={`tracking-tight content`}>
         <div className="text-3xl text-center md:text-right">
-          <p className="m-0 p-0 mt-1">&copy; {new Date().getFullYear()}</p>
+          <p className="m-0 p-0">&copy; {new Date().getFullYear()}</p>
         </div>
       </footer>
     </section>

@@ -39,7 +39,7 @@ export const Nav: React.FC<{
               <Link
                 href="/about"
                 prefetch={false}
-                className="flex gap-1 items-center text-2xl sm:text-sm text-gray-400 hover:text-gray-500"
+                className="flex gap-1 items-center text-2xl sm:leading-5 sm:text-[15px] text-gray-400 hover:text-gray-500"
               >
                 <InfoIcon />
                 About
@@ -49,7 +49,7 @@ export const Nav: React.FC<{
               <Link
                 href="/about"
                 prefetch={false}
-                className="flex gap-1 items-center text-lg sm:text-sm text-gray-400 hover:text-gray-500"
+                className="flex gap-1 items-center text-2xl sm:leading-5 sm:text-[15px] text-gray-400 hover:text-gray-500"
               >
                 <SocialIcon />
                 Socials

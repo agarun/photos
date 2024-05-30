@@ -14,6 +14,9 @@ const config: Config = {
     extend: {
       spacing: {
         '2.5': '0.875rem'
+      },
+      screens: {
+        '3xl': '2000px'
       }
     }
   },

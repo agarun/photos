@@ -19,11 +19,14 @@ function Noise() {
         currentCanvas.width,
         currentCanvas.height
       );
-      const buffer = new Uint32Array(imageData.data.buffer);
-      for (let i = 0; i < buffer.length; i++) {
+      const data = imageData.data; // `Uint8ClampedArray`
+      for (let i = 0; i < data.length; i += 4) {
         const gray = 230 + Math.random() * 25; // Gray values closer to white
         const alpha = 0.25 * 255; // Adjust opacity
-        buffer[i] = ((alpha << 24) | (gray << 16) | (gray << 8) | gray) >>> 0;
+        data[i] = gray; // Red
+        data[i + 1] = gray; // Green
+        data[i + 2] = gray; // Blue
+        data[i + 3] = alpha; // Alpha
       }
       context.putImageData(imageData, 0, 0);
     }
@@ -38,7 +41,7 @@ function Noise() {
     <div
       id="noise"
       className={`will-change-transform mix-blend-multiply
-        absolute z-50 top-0 left-0 pointer-events-none
+        fixed z-50 top-0 left-0 pointer-events-none
         w-full h-lvh 
         transition-opacity duration-500 opacity-100`}
       style={{
