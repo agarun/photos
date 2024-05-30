@@ -1,9 +1,9 @@
 import dynamic from 'next/dynamic';
 import { getAlbum, getAlbums } from '@/lib/api';
 import Nav from '@/lib/nav';
-import { slugToAlbumTitle } from '@/lib/api/slug';
+import { albumTitleToSlug, slugToAlbumTitle } from '@/lib/api/slug';
 import { LocationIcon } from '@/lib/icons/location-icon';
-import { Album } from '@/types';
+import { TagChip, useTags } from './chip';
 
 const Masonry = dynamic(() => import('@/lib/images/masonry'), {
   ssr: false
@@ -11,27 +11,13 @@ const Masonry = dynamic(() => import('@/lib/images/masonry'), {
 
 export async function generateStaticParams() {
   const albums = await getAlbums();
-  return albums.map(album => ({ slug: album.title.toLowerCase() }));
-}
-
-function useTags(album: Pick<Album, 'date' | 'description' | 'locations'>) {
-  let tags = [];
-  tags.push(album.date);
-  for (const location of album.locations) {
-    tags.push(location.date);
-  }
-  tags.push(album.description);
-  for (const location of album.locations) {
-    tags.push(location.description);
-  }
-  tags = tags.filter(Boolean);
-  return tags;
+  return albums.map(album => ({ slug: albumTitleToSlug(album.title) }));
 }
 
 async function AlbumPage({ params: { slug } }: { params: { slug: string } }) {
   const albums = await getAlbums();
   const title = slugToAlbumTitle(slug);
-  const { album, photos } = await getAlbum(slugToAlbumTitle(slug));
+  const { album, photos } = await getAlbum(title);
   const tags = useTags(album);
 
   return (
@@ -54,12 +40,7 @@ async function AlbumPage({ params: { slug } }: { params: { slug: string } }) {
             <h1 className="font-normal text-2xl text-gray-600 mt-4">{title}</h1>
             <div className="text-gray-500 flex items-end justify-end flex-wrap-reverse gap-2 text-sm">
               {tags.map(tag => (
-                <div
-                  key={tag}
-                  className="border border-gray-300 rounded-md px-3 py-1"
-                >
-                  {tag}
-                </div>
+                <TagChip key={tag} tag={tag} />
               ))}
             </div>
           </div>
