@@ -1,11 +1,11 @@
 import dynamic from 'next/dynamic';
 import { getAlbum, getAlbums } from '@/lib/api';
 import Nav from '@/lib/nav';
-import { slugToAlbumTitle } from '@/lib/slug';
+import { slugToAlbumTitle } from '@/lib/api/slug';
 import { LocationIcon } from '@/lib/icons/location-icon';
 import { Album } from '@/types';
 
-const Masonry = dynamic(() => import('@/lib/masonry'), {
+const Masonry = dynamic(() => import('@/lib/images/masonry'), {
   ssr: false
 });
 

@@ -29,9 +29,6 @@
 }
 
 /* Animations */
-.fade-in {
-  animation: fadeIn 2.5s ease-in-out;
-}
 @keyframes fadeIn {
   0% {
     opacity: 0;
@@ -40,14 +37,17 @@
     opacity: 1;
   }
 }
-.blink {
-  animation: blink 1s step-start infinite;
-  pointer-events: none;
+.fade-in {
+  animation: fadeIn 2.5s ease-in-out;
 }
 @keyframes blink {
   50% {
     opacity: 0;
   }
+}
+.blink {
+  animation: blink 1s step-start infinite;
+  pointer-events: none;
 }
 @keyframes scaleIn {
   0%,
@@ -72,6 +72,20 @@
   animation-fill-mode: both;
   animation-iteration-count: 1;
   animation-delay: 150ms;
+}
+@keyframes marquee {
+  0% {
+    left: 0;
+  }
+  100% {
+    left: -100%;
+  }
+}
+.marquee div {
+  display: block;
+  position: absolute;
+  overflow: hidden;
+  animation: marquee 5s linear infinite;
 }
 
 /* Lightbox */

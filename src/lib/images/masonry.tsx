@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Masonry as MasonicMasonry } from 'masonic';
-import { useLightbox } from '../hooks/use-lightbox';
+import { useLightbox } from '../../hooks/use-lightbox';
 import { Photo } from '@/types';
 
 const MasonryItem = ({ data: { url, width, height } }: { data: Photo }) => (

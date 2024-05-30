@@ -81,8 +81,8 @@ async function AboutPage() {
         `}</p>
 
           <p className="mb-32 text-lg">
-            The website is open source on GitHub, built with React and hosted on
-            Pages and Contentful.
+            The website is open source on GitHub, built with TypeScript and
+            React, and hosted using Pages and Contentful.
           </p>
 
           <Contact />
