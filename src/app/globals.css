@@ -78,18 +78,27 @@
   animation-delay: 150ms;
 }
 @keyframes marquee {
-  0% {
-    left: 0;
+  from {
+    transform: translateX(0);
   }
-  100% {
-    left: -100%;
+  to {
+    transform: translateX(calc(-100% - 1rem));
   }
 }
-.marquee div {
-  display: block;
-  position: absolute;
+.marquee {
+  position: relative;
+  display: flex;
   overflow: hidden;
-  animation: marquee 5s linear infinite;
+  user-select: none;
+  gap: 1rem;
+}
+.marquee-content {
+  display: flex;
+  justify-content: space-around;
+  flex-shrink: 0;
+  gap: 1rem;
+  min-width: 100%;
+  animation: marquee 10s linear infinite;
 }
 
 /* Lightbox */
