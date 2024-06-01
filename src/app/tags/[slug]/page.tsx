@@ -6,12 +6,12 @@ export async function generateStaticParams() {
   const start = 2015;
   const end = new Date().getFullYear();
   return Array.from({ length: end - start + 1 }, (_, i) => ({
-    slug: start + i
+    slug: (start + i).toString()
   }));
 }
 
-async function Tag({ params: { tag } }: { params: { tag: string } }) {
-  const [albums, photos] = await Promise.all([getAlbums(), getPhotos(tag)]);
+async function Tag({ params: { slug } }: { params: { slug: string } }) {
+  const [albums, photos] = await Promise.all([getAlbums(), getPhotos(slug)]);
 
   return (
     <section className="flex flex-col sm:flex-row sm:my-20">
@@ -19,7 +19,17 @@ async function Tag({ params: { tag } }: { params: { tag: string } }) {
         <Nav albums={albums} />
       </div>
 
-      <Masonry className="my-12" items={photos} />
+      <div className="flex-col">
+        <div
+          className={`mt-12 inline-block px-2 py-1
+          border-dashed border border-gray-200 rounded-md
+          bg-gray-100 text-gray-500`}
+        >
+          {slug}
+        </div>
+
+        <Masonry className="my-6" items={photos} />
+      </div>
     </section>
   );
 }

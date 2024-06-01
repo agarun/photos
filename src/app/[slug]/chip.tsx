@@ -22,7 +22,7 @@ export function useTags(
 function dateFromTag(tag: Tag) {
   // either begins with `20##`, or `20##` is preceded by non-digit
   // e.g. '20241231...', 'IMG_20241231...'
-  return tag?.match(/(?:^20|[^\d]20)\d{2}/g)?.[0];
+  return tag?.match(/(?:^20|[^\d]20)\d{2}/g)?.[0]?.trim();
 }
 
 export function TagChip({ tag }: { tag: Tag }) {
@@ -36,7 +36,12 @@ export function TagChip({ tag }: { tag: Tag }) {
 
   if (date) {
     return (
-      <Link key={tag} href={`/tags/${date}`} className="hover:bg-gray-300">
+      <Link
+        key={tag}
+        href={`/tags/${date}`}
+        className="hover:bg-gray-200/50"
+        prefetch={false}
+      >
         {chip}
       </Link>
     );
