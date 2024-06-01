@@ -8,8 +8,10 @@ import { GeoJsonGeometry } from 'three-geojson-geometry';
 import { geoGraticule10 } from 'd3-geo';
 import * as topojson from 'topojson-client';
 import { useWindowSize } from '@/hooks/use-window-size';
-import { Album, AlbumTitle, types } from '../../types/albums';
+import { Album, AlbumTitle, types } from '@/types/albums';
+import { albumTitleToSlug } from '@/lib/api/slug';
 import Link from 'next/link';
+import { AlbumCard } from './card';
 
 type Ref = CustomGlobeMethods | undefined; // Reference to globe instance
 type GlobeEl = React.MutableRefObject<Ref>; // React `ref` passed to globe element
@@ -87,7 +89,7 @@ function useRings(
   globeElRef: CustomGlobeMethods,
   setPointAltitude: React.Dispatch<React.SetStateAction<number>>
 ) {
-  const [activeAlbum, setActiveAlbum] = useState<AlbumTitle>();
+  const [activeAlbumTitle, setActiveAlbumTitle] = useState<AlbumTitle>();
 
   const [rings, setRings] = useState<Array<Ring>>([]);
   const colorInterpolator = (t: number) =>
@@ -95,7 +97,7 @@ function useRings(
 
   const [enterTimeoutId, setEnterTimeoutId] = useState<NodeJS.Timeout>();
   function handleMouseEnter({ lat, lng, title, type }: Album) {
-    setActiveAlbum(title);
+    setActiveAlbumTitle(title);
 
     clearTimeout(enterTimeoutId);
 
@@ -138,7 +140,7 @@ function useRings(
   function handleMouseLeave() {
     setPointAltitude(0.002);
 
-    setActiveAlbum(undefined);
+    // setActiveAlbumTitle(undefined);
 
     globeElRef.pointOfView(
       {
@@ -155,7 +157,7 @@ function useRings(
   }
 
   return {
-    activeAlbum,
+    activeAlbumTitle,
     rings,
     colorInterpolator,
     handleMouseEnter,
@@ -325,7 +327,7 @@ function useScene(globeElRef: Ref) {
     );
     const innerSphereMaterial = new THREE.MeshBasicMaterial({
       color: 0xffffff /* it's neat to try different colors here */,
-      opacity: 0.43,
+      opacity: 0.47,
       transparent: true
     });
     const innerSphere = new THREE.Mesh(
@@ -356,8 +358,14 @@ function Globe({ albums }: { albums: Array<Album> }) {
   const { points, pointAltitude, setPointAltitude } = usePoints(albums);
 
   // rings animation
-  const { rings, colorInterpolator, handleMouseEnter, handleMouseLeave } =
-    useRings(globeElRef as CustomGlobeMethods, setPointAltitude);
+  const {
+    rings,
+    colorInterpolator,
+    handleMouseEnter,
+    handleMouseLeave,
+    activeAlbumTitle
+  } = useRings(globeElRef as CustomGlobeMethods, setPointAltitude);
+  const activeAlbum = albums.find(album => album.title === activeAlbumTitle);
 
   // arcs animation
   const { arcs } = useArcs(albums);
@@ -380,8 +388,9 @@ function Globe({ albums }: { albums: Array<Album> }) {
         sm:py-36
         md:py-32 md:px-24
         lg:py-40 lg:px-36
-        xl:py-64 xl:px-48
-        2xl:px-64`}
+        xl:py-48 xl:px-48
+        2xl:px-64
+        3xl:py-56`}
     >
       <GlobeGL
         ref={globeEl}
@@ -421,8 +430,8 @@ function Globe({ albums }: { albums: Array<Album> }) {
         customThreeObjectUpdate={customThreeObjectUpdate}
       />
 
-      <section className={`content-container grow text-3xl`}>
-        <h1 className="font-bold mb-20 text-center md:text-left">
+      <section className="content-container grow text-3xl">
+        <h1 className="font-bold mb-12 sm:mb-20 text-center md:text-left">
           Aaron Agarunov
         </h1>
 
@@ -443,7 +452,7 @@ function Globe({ albums }: { albums: Array<Album> }) {
                 }}
               >
                 <Link
-                  href={`/${album.title.toLowerCase()}`}
+                  href={`/${albumTitleToSlug(album.title)}`}
                   className="hover:text-gray-500"
                 >
                   {album.title}
@@ -453,6 +462,8 @@ function Globe({ albums }: { albums: Array<Album> }) {
           })}
         </ul>
       </section>
+
+      {activeAlbum && <AlbumCard album={activeAlbum} />}
 
       <footer className={`tracking-tight content`}>
         <div className="text-3xl text-center md:text-right">
