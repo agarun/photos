@@ -140,7 +140,7 @@ function useRings(
   function handleMouseLeave() {
     setPointAltitude(0.002);
 
-    // setActiveAlbumTitle(undefined);
+    setActiveAlbumTitle(undefined);
 
     globeElRef.pointOfView(
       {
