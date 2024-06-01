@@ -1,6 +1,10 @@
+import dynamic from 'next/dynamic';
 import { getAlbums, getPhotos } from '@/lib/api';
-import Masonry from '@/lib/images/masonry';
 import Nav from '@/lib/nav';
+
+const Masonry = dynamic(() => import('@/lib/images/masonry'), {
+  ssr: false
+});
 
 export async function generateStaticParams() {
   const start = 2015;
