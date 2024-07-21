@@ -13,11 +13,7 @@ const MasonryItem = ({ data: { url, width, height } }: { data: Photo }) => (
     target="_blank"
     rel="noreferrer"
   >
-    <img
-      className="scale-in transition-opacity ease-in duration-500"
-      src={url}
-      alt=""
-    />
+    <img src={url} alt="" />
   </a>
 );
 
@@ -37,14 +33,17 @@ export const Masonry = ({
   return (
     <section
       id="gallery"
-      className="h-full w-full md:w-[500px] lg:w-[720px] xl:w-[1000px] px-2 sm:p-0"
+      className={`h-full w-full
+      md:w-[500px] lg:w-[720px] xl:w-[1000px] 2xl:w-[1200px]
+      px-2 sm:p-0
+      fade-in-delayed`}
     >
       <MasonicMasonry
         items={items}
         render={MasonryItem}
         columnGutter={window.innerWidth <= 512 ? 9 : 18}
-        columnWidth={250}
-        overscanBy={2}
+        columnWidth={window.innerWidth < 512 ? 250 : 350}
+        overscanBy={1}
         {...props}
       />
     </section>

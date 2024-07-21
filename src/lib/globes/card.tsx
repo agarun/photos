@@ -21,6 +21,7 @@ export function AlbumCard({ album }: { album: Album }) {
         absolute z-50
         rounded-lg bg-gray-100 w-60 text-2xl opacity-50 flex flex-col
         border border-gray-200
+        max-sm:hidden
         overflow-hidden`}
       style={{
         left: `calc(33% + ${randomLeft}px)`,
