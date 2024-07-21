@@ -17,6 +17,22 @@ const MasonryItem = ({ data: { url, width, height } }: { data: Photo }) => (
   </a>
 );
 
+function columnWidth() {
+  if (window.innerWidth > 2000) {
+    // 3xl
+    return 450;
+  } else if (window.innerWidth > 1536) {
+    // 2xl
+    return 400;
+  } else if (window.innerWidth > 1280) {
+    // xl
+    return 350;
+  } else {
+    // mobile-ish
+    return 250;
+  }
+}
+
 export const Masonry = ({
   items = [],
   ...props
@@ -34,7 +50,7 @@ export const Masonry = ({
     <section
       id="gallery"
       className={`h-full w-full
-      md:w-[500px] lg:w-[720px] xl:w-[1000px] 2xl:w-[1200px]
+      md:w-[500px] lg:w-[720px] xl:w-[1000px] 2xl:w-[1200px] 3xl:w-[1300px]
       px-2 sm:p-0
       fade-in-delayed`}
     >
@@ -42,7 +58,7 @@ export const Masonry = ({
         items={items}
         render={MasonryItem}
         columnGutter={window.innerWidth <= 512 ? 9 : 18}
-        columnWidth={window.innerWidth < 512 ? 250 : 350}
+        columnWidth={columnWidth()}
         overscanBy={1}
         {...props}
       />

@@ -23,7 +23,7 @@ async function Tag({ params: { slug } }: { params: { slug: string } }) {
         <Nav albums={albums} />
       </div>
 
-      <div className="flex-col">
+      <div className="flex-col max-sm:px-2">
         <div
           className={`mt-12 inline-block px-2 py-1
           border-dashed border border-gray-200 rounded-md

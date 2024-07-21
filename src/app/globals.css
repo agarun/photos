@@ -56,7 +56,7 @@
   }
 }
 .fade-in-delayed {
-  animation: fadeInDelayed 2.5s ease-in-out;
+  animation: fadeInDelayed 3.6s ease-in-out;
 }
 @keyframes blink {
   50% {
