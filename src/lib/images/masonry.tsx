@@ -20,7 +20,7 @@ const MasonryItem = ({ data: { url, width, height } }: { data: Photo }) => (
 function columnWidth() {
   if (window.innerWidth > 2000) {
     // 3xl
-    return 450;
+    return 425;
   } else if (window.innerWidth > 1536) {
     // 2xl
     return 400;
@@ -49,9 +49,9 @@ export const Masonry = ({
   return (
     <section
       id="gallery"
-      className={`h-full w-full
-      md:w-[500px] lg:w-[720px] xl:w-[1000px] 2xl:w-[1200px] 3xl:w-[1300px]
-      px-2 sm:p-0
+      className={`h-full w-full min-h-screen
+      md:w-[500px] lg:w-[720px] xl:w-[1000px] 2xl:w-[1200px] 3xl:w-[1250px]
+      px-2 sm:p-0 sm:pb-48
       fade-in-delayed`}
     >
       <MasonicMasonry
