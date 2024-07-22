@@ -37,7 +37,9 @@ async function AlbumPage({ params: { slug } }: { params: { slug: string } }) {
             <LocationIcon />
           </div>
           <div className="flex items-end justify-between gap-24">
-            <h1 className="font-normal text-2xl text-gray-600 mt-4">{title}</h1>
+            <h1 className="font-normal text-2xl text-gray-600 mt-4 min-w-32">
+              {title}
+            </h1>
             <div className="text-gray-500 flex items-end justify-end flex-wrap-reverse gap-2 text-sm">
               {tags.map(tag => (
                 <TagChip key={tag} tag={tag} />

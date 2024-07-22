@@ -41,3 +41,20 @@ TypeScript, Zod, Tailwind, and [Next.js](https://nextjs.org/)
 The Next site is statically exported and hosted on a GitHub pages site using GitHub Actions.
 
 All assets are stored on [Contentful](https://www.contentful.com/) and fetched from their GraphQL endpoint.
+
+### Schema
+
+| Field       | Contentful Type |
+| ----------- | --------------- |
+| title       | Short text      |
+| photos      | Media           |
+| color       | Short text      |
+| type        | Short text      |
+| description | Long text       |
+| date        | Short text      |
+| lat         | Decimal         |
+| lng         | Decimal         |
+| locations   | JSON            |
+| order       | Decimal         |
+
+For more information, see the [album types](https://github.com/agarun/photos/blob/main/src/types/albums.ts#L14).
