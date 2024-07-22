@@ -40,7 +40,10 @@ async function AlbumPage({ params: { slug } }: { params: { slug: string } }) {
             <h1 className="font-normal text-2xl text-gray-600 mt-4 min-w-32">
               {title}
             </h1>
-            <div className="text-gray-500 flex items-end justify-end flex-wrap-reverse gap-2 text-sm">
+            <div
+              className={`flex items-end justify-end flex-wrap-reverse gap-2
+                text-gray-500 text-sm`}
+            >
               {tags.map(tag => (
                 <TagChip key={tag} tag={tag} />
               ))}
