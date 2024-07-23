@@ -21,7 +21,7 @@ async function AlbumPage({ params: { slug } }: { params: { slug: string } }) {
   const tags = useTags(album);
 
   return (
-    <section className="flex flex-col sm:flex-row sm:my-20">
+    <section className="flex flex-col sm:flex-row sm:my-20" id="top">
       <div className="pt-10 sm:pl-10 sm:pr-20 lg:pl-20 lg:pr-40 space-y-1">
         <Nav albums={albums} title={title} />
       </div>
@@ -52,6 +52,13 @@ async function AlbumPage({ params: { slug } }: { params: { slug: string } }) {
         </div>
 
         <Masonry className="my-12" items={photos} />
+
+        <a
+          href="#top"
+          className="pt-6 max-sm:px-2 max-sm:pb-6 text-gray-400 hover:text-gray-600 fade-in-delayed"
+        >
+          Back to top ↑
+        </a>
       </div>
     </section>
   );
