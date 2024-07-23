@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { AlbumSchema } from '.';
+import { AlbumSchema, FolderSchema } from '.';
 
 export type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -31,7 +31,7 @@ export type Photo = z.infer<typeof PhotoSchema>;
 
 export const AlbumResponseSchema = z.object({
   data: z.object({
-    photoGalleryCollection: z.object({
+    photoAlbumsCollection: z.object({
       items: z.array(AlbumSchema)
     })
   })
@@ -39,7 +39,7 @@ export const AlbumResponseSchema = z.object({
 
 export const AlbumPhotosResponseSchema = z.object({
   data: z.object({
-    photoGalleryCollection: z.object({
+    photoAlbumsCollection: z.object({
       items: z.array(
         AlbumSchema.extend({
           photosCollection: z.object({
@@ -55,6 +55,28 @@ export const AssetsResponseSchema = z.object({
   data: z.object({
     assetCollection: z.object({
       items: z.array(PhotoSchema)
+    })
+  })
+});
+
+export const FolderResponseSchema = z.object({
+  data: z.object({
+    photoFoldersCollection: z.object({
+      items: z.array(FolderSchema)
+    })
+  })
+});
+
+export const FolderPhotosResponseSchema = z.object({
+  data: z.object({
+    photoFoldersCollection: z.object({
+      items: z.array(
+        AlbumSchema.extend({
+          photosCollection: z.object({
+            items: z.array(PhotoSchema)
+          })
+        })
+      )
     })
   })
 });
