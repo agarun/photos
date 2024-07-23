@@ -55,9 +55,12 @@ async function AlbumPage({ params: { slug } }: { params: { slug: string } }) {
 
         <a
           href="#top"
-          className="pt-6 max-sm:px-2 max-sm:pb-6 text-gray-400 hover:text-gray-600 fade-in-delayed"
+          className={`pt-6 max-sm:px-2 max-sm:pb-6
+            max-sm:text-center max-sm:w-full
+            text-gray-400 hover:text-gray-600
+            fade-in-delayed`}
         >
-          Back to top ↑
+          Go to top ↑
         </a>
       </div>
     </section>
