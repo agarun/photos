@@ -20,12 +20,12 @@ export abstract class BaseClient {
     return this.baseUrl.substring(0, this.baseUrl.lastIndexOf('/'));
   }
 
-  async request<Request, Response>(
-    requestSchema: z.ZodSchema<Request>,
-    responseSchema: z.ZodSchema<Response>,
+  async request<Request extends z.Schema, Response extends z.Schema>(
+    requestSchema: Request,
+    responseSchema: Response,
     config: Config
   ): Promise<
-    (z.infer<z.ZodSchema<Response>> & SuccessResponse) | ErrorResponse
+    (z.infer<typeof responseSchema> & SuccessResponse) | ErrorResponse
   > {
     const controller = new AbortController();
     const { signal } = controller;
