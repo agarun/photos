@@ -147,8 +147,7 @@ query {
   photoFoldersCollection {
     items {
       title
-      parent_title
-      photos
+      parentTitle
       description
       date
       order
@@ -181,7 +180,7 @@ query {
   photoFoldersCollection(where: { title: "${title}" }) {
     items {
       title
-      parent_title
+      parentTitle
       description
       description
       date
