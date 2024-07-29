@@ -1,11 +1,11 @@
 import { getFolder, getFolders } from '@/lib/api';
-import { slugToFolderName } from '@/lib/api/slug';
+import { slugToFolderName, titleToSlug } from '@/lib/api/slug';
 import Grid from '@/lib/images/pig-grid';
 import Link from 'next/link';
 
 export async function generateStaticParams() {
   const folders = await getFolders();
-  return folders.map(folder => ({ slug: folder.title }));
+  return folders.map(folder => ({ slug: titleToSlug(folder.title) }));
 }
 
 async function Folder({ params: { slug } }: { params: { slug: string } }) {
