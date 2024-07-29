@@ -1,6 +1,6 @@
 import { getFolder, getFolders } from '@/lib/api';
 import { slugToFolderName } from '@/lib/api/slug';
-import Grid from '@/lib/images/grid';
+import Grid from '@/lib/images/pig-grid';
 import Link from 'next/link';
 
 export async function generateStaticParams() {

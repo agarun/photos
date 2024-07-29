@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic';
 import { getAlbum, getAlbums } from '@/lib/api';
 import Nav from '@/lib/nav';
-import { albumTitleToSlug, slugToAlbumTitle } from '@/lib/api/slug';
+import { titleToSlug, slugToAlbumTitle } from '@/lib/api/slug';
 import { LocationIcon } from '@/lib/icons/location-icon';
 import { TagChip, useTags } from './chip';
 
@@ -11,7 +11,7 @@ const Masonry = dynamic(() => import('@/lib/images/masonry'), {
 
 export async function generateStaticParams() {
   const albums = await getAlbums();
-  return albums.map(album => ({ slug: albumTitleToSlug(album.title) }));
+  return albums.map(album => ({ slug: titleToSlug(album.title) }));
 }
 
 async function AlbumPage({ params: { slug } }: { params: { slug: string } }) {
