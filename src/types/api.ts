@@ -71,7 +71,7 @@ export const FolderPhotosResponseSchema = z.object({
   data: z.object({
     photoFoldersCollection: z.object({
       items: z.array(
-        AlbumSchema.extend({
+        FolderSchema.extend({
           photosCollection: z.object({
             items: z.array(PhotoSchema)
           })

@@ -45,8 +45,9 @@ export async function getFolder(folder: string) {
   const client = new Client();
   const data = await client.folder(folder).get();
   if (data.success) {
-    const photos = data.data.assetCollection.items;
-    return photos;
+    const folder = data.data.photoFoldersCollection.items[0];
+    const photos = folder.photosCollection.items;
+    return { folder, photos };
   }
   throw new Error(`Failed to fetch folder '${folder}'`);
 }

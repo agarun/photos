@@ -4,6 +4,7 @@ import {
   AlbumPhotosResponseSchema,
   AlbumResponseSchema,
   AssetsResponseSchema,
+  FolderPhotosResponseSchema,
   FolderResponseSchema
 } from '@/types/api';
 export class Client extends BaseClient {
@@ -182,7 +183,6 @@ query {
       title
       parentTitle
       description
-      description
       date
       order
       photosCollection {
@@ -202,11 +202,15 @@ query {
   }
 }`;
 
-    const response = await this.request(z.string(), AssetsResponseSchema, {
-      method: 'POST',
-      body: JSON.stringify({ query }),
-      next: { tags: ['folders'] }
-    });
+    const response = await this.request(
+      z.string(),
+      FolderPhotosResponseSchema,
+      {
+        method: 'POST',
+        body: JSON.stringify({ query }),
+        next: { tags: ['folders'] }
+      }
+    );
     return response;
   }
 }
