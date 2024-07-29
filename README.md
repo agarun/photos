@@ -71,7 +71,7 @@ Special albums on the front page like `Music` can exist without coordinate data 
 | locations   | JSON: Array<{ lat, lng, description }> |
 | order       | Decimal                                |
 
-For more information, see the [album types](https://github.com/agarun/photos/blob/main/src/types/albums.ts#L14).
+For more information, see the [album types](https://github.com/agarun/photos/blob/main/src/types/albums.ts#L14). Note this field originally had ID `photoGallery`.
 
 #### Photo Folders
 

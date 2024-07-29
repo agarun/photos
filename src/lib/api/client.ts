@@ -25,7 +25,7 @@ export class AlbumsClient extends BaseClient {
   async get() {
     const query = `
 query {
-  photoAlbumsCollection {
+  photoGalleryCollection {
     items {
       title
       color
@@ -62,7 +62,7 @@ export class AlbumClient extends BaseClient {
     const title = this.slug;
     const query = `
 query {
-  photoAlbumsCollection(where: { title: "${title}" }) {
+  photoGalleryCollection(where: { title: "${title}" }) {
     items {
       title
       color

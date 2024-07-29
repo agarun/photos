@@ -31,7 +31,7 @@ export type Photo = z.infer<typeof PhotoSchema>;
 
 export const AlbumResponseSchema = z.object({
   data: z.object({
-    photoAlbumsCollection: z.object({
+    photoGalleryCollection: z.object({
       items: z.array(AlbumSchema)
     })
   })
@@ -39,7 +39,7 @@ export const AlbumResponseSchema = z.object({
 
 export const AlbumPhotosResponseSchema = z.object({
   data: z.object({
-    photoAlbumsCollection: z.object({
+    photoGalleryCollection: z.object({
       items: z.array(
         AlbumSchema.extend({
           photosCollection: z.object({

@@ -4,7 +4,7 @@ export async function getAlbums() {
   const client = new Client();
   const data = await client.albums.get();
   if (data.success) {
-    const albums = data.data.photoAlbumsCollection.items;
+    const albums = data.data.photoGalleryCollection.items;
     return [...albums].sort((a, b) => a.order - b.order);
   }
   throw new Error('Failed to fetch albums');
@@ -14,7 +14,7 @@ export async function getAlbum(slug: string) {
   const client = new Client();
   const data = await client.album(slug).get();
   if (data.success) {
-    const album = data.data.photoAlbumsCollection.items[0];
+    const album = data.data.photoGalleryCollection.items[0];
     const photos = album.photosCollection.items;
     return { album, photos };
   }
