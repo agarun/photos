@@ -40,7 +40,7 @@ The project is written in TypeScript, using Zod, Tailwind, and [Next.js](https:/
 
 [Masonic](https://github.com/jaredLunde/masonic) for masonry layouts
 
-[Justified](https://github.com/miromannino/Justified-Gallery/) / [Pig](https://github.com/schlosser/pig.js/) for image grid layouts
+[Pig](https://github.com/schlosser/pig.js/) for image grid layouts
 
 [`cwebp`](https://developers.google.com/speed/webp/docs/cwebp) for compressing .jpg to .webp images. See `scripts/webp.sh` for details regarding image optimization.
 
