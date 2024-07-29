@@ -59,6 +59,7 @@ export const Masonry = ({
         render={MasonryItem}
         columnGutter={window.innerWidth <= 512 ? 9 : 18}
         columnWidth={columnWidth()}
+        itemHeightEstimate={500}
         overscanBy={1}
         {...props}
       />
