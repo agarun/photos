@@ -16,5 +16,7 @@ export function slugToAlbumTitle(string: string): AlbumTitle {
 }
 
 export function slugToFolderName(string: string): FolderName {
-  return string.split('-').map(capitalize).join(' ') as FolderName;
+  let name = string.split('-').map(capitalize).join(' ');
+  if (name.length < 4) name = name.toUpperCase();
+  return name as FolderName;
 }
