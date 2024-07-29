@@ -1,89 +1,68 @@
+import { BaseClient } from './base-client';
 import { z } from 'zod';
 import {
-  Config,
-  ErrorResponse,
-  SuccessResponse,
   AlbumPhotosResponseSchema,
   AlbumResponseSchema,
-  AssetsResponseSchema
+  AssetsResponseSchema,
+  FolderPhotosResponseSchema,
+  FolderResponseSchema
 } from '@/types/api';
-
-const defaultBaseUrl = `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`;
-
-function authorizationHeader(preview: boolean | undefined): string {
-  return `Bearer ${
-    preview
-      ? process.env.CONTENTFUL_PREVIEW_ACCESS_TOKEN
-      : process.env.CONTENTFUL_ACCESS_TOKEN
-  }`;
-}
-
-export class BaseClient {
-  constructor(protected baseUrl: string = defaultBaseUrl) {
-    this.baseUrl = baseUrl;
+export class Client extends BaseClient {
+  albums = new AlbumsClient(this.baseUrl);
+  album(slug: string) {
+    return new AlbumClient(this.baseUrl, slug);
   }
 
-  async request<Request, Response>(
-    requestSchema: z.ZodSchema<Request>,
-    responseSchema: z.ZodSchema<Response>,
-    config: Config
-  ): Promise<
-    (z.infer<z.ZodSchema<Response>> & SuccessResponse) | ErrorResponse
-  > {
-    const controller = new AbortController();
-    const { signal } = controller;
+  photos = new PhotosClient(this.baseUrl);
 
-    const timeout = config.timeout || 10000;
-    const timeoutRef = setTimeout(() => {
-      controller.abort(`Request cancelled after waiting ${timeout}ms`);
-    }, timeout);
+  folders = new FoldersClient(this.baseUrl);
+  folder(slug: string) {
+    return new FolderClient(this.baseUrl, slug);
+  }
+}
 
-    try {
-      requestSchema.parse(config.body);
-
-      const response = await fetch(this.baseUrl, {
-        signal,
-        ...config,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: authorizationHeader(config.preview),
-          ...config.headers
-        }
-      });
-
-      const data = await response.json();
-
-      responseSchema.parse(data);
-
-      return { ...data, success: true };
-    } catch (error) {
-      console.error(error);
-      if (error instanceof z.ZodError) {
-        return { success: false, message: error.message, error };
-      }
-
-      if (error instanceof Error) {
-        return { success: false, message: error.message };
-      }
-
-      return { success: false, message: 'Unexpected server error.' };
-    } finally {
-      clearTimeout(timeoutRef);
-      controller.abort();
+export class AlbumsClient extends BaseClient {
+  async get() {
+    const query = `
+query {
+  photoGalleryCollection {
+    items {
+      title
+      color
+      type
+      description
+      date
+      lat
+      lng
+      locations
+      order
     }
   }
-}
+}`;
 
-export class Client extends BaseClient {
-  albums = new AlbumClient(this.baseUrl);
-  photos = new PhotoClient(this.baseUrl);
+    const response = await this.request(z.string(), AlbumResponseSchema, {
+      method: 'POST',
+      body: JSON.stringify({ query }),
+      next: { tags: ['albums'], revalidate: false }
+    });
+    return response;
+  }
 }
 
 export class AlbumClient extends BaseClient {
-  async find(slug: string) {
+  constructor(
+    protected baseUrl: string,
+    private slug: string
+  ) {
+    super(baseUrl);
+    this.slug = slug;
+  }
+
+  async get() {
+    const title = this.slug;
     const query = `
 query {
-  photoGalleryCollection(where: { title: "${slug}" }) {
+  photoGalleryCollection(where: { title: "${title}" }) {
     items {
       title
       color
@@ -118,35 +97,9 @@ query {
     });
     return response;
   }
-
-  async get() {
-    const query = `
-query {
-  photoGalleryCollection {
-    items {
-      title
-      color
-      type
-      description
-      date
-      lat
-      lng
-      locations
-      order
-    }
-  }
-}`;
-
-    const response = await this.request(z.string(), AlbumResponseSchema, {
-      method: 'POST',
-      body: JSON.stringify({ query }),
-      next: { tags: ['albums'], revalidate: false }
-    });
-    return response;
-  }
 }
 
-export class PhotoClient extends BaseClient {
+export class PhotosClient extends BaseClient {
   async findBy(tag: string) {
     const query = `
 query($tag: String!) {
@@ -172,6 +125,92 @@ query($tag: String!) {
       body: JSON.stringify({ query, variables: { tag } }),
       next: { tags: ['photos'] }
     });
+    // If the tag is a year, we might accidentally match 4-digit numbers in the filename that aren't the year.
+    // For example, `IMG_20240211_020123.jpg` is dated in `2024`, but it would show up in our Contentful query for `2012`.
+    // Contentful's GraphQL API does not support filtering by regular expressions.
+    if (tag.match(/2\d{3}/) && response.success) {
+      response.data.assetCollection.items =
+        response.data.assetCollection.items.filter(asset => {
+          const urlParts = asset.url.split('/');
+          const filename = urlParts[urlParts.length - 1];
+          const year = filename.match(/2\d{3}/)?.[0]; // Assume the first 4-digit number is a year
+          return year == tag;
+        });
+    }
+    return response;
+  }
+}
+
+export class FoldersClient extends BaseClient {
+  async get() {
+    const query = `
+query {
+  photoFoldersCollection {
+    items {
+      title
+      parentTitle
+      description
+      date
+      order
+    }
+  }
+}`;
+
+    const response = await this.request(z.string(), FolderResponseSchema, {
+      method: 'POST',
+      body: JSON.stringify({ query }),
+      next: { tags: ['folders'], revalidate: false }
+    });
+    return response;
+  }
+}
+
+export class FolderClient extends BaseClient {
+  constructor(
+    protected baseUrl: string,
+    private slug: string
+  ) {
+    super(baseUrl);
+    this.slug = slug;
+  }
+
+  async get() {
+    const title = this.slug;
+    const query = `
+query {
+  photoFoldersCollection(where: { title: "${title}" }) {
+    items {
+      title
+      parentTitle
+      description
+      date
+      order
+      photosCollection {
+        items {
+          size
+          url
+          width
+          height
+        }
+      }
+      contentfulMetadata {
+        tags {
+          name
+        }
+      }
+    }
+  }
+}`;
+
+    const response = await this.request(
+      z.string(),
+      FolderPhotosResponseSchema,
+      {
+        method: 'POST',
+        body: JSON.stringify({ query }),
+        next: { tags: ['folders'] }
+      }
+    );
     return response;
   }
 }

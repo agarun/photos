@@ -20,6 +20,9 @@ dependencies:
   d3-geo:
     specifier: ^3.1.1
     version: 3.1.1
+  justifiedGallery:
+    specifier: ^3.8.1
+    version: 3.8.1
   masonic:
     specifier: ^4.0.0
     version: 4.0.0(react@18.3.1)
@@ -5014,6 +5017,10 @@ packages:
       '@sideway/pinpoint': 2.0.0
     dev: false
 
+  /jquery@3.7.1:
+    resolution: {integrity: sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg==}
+    dev: false
+
   /js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
@@ -5125,6 +5132,13 @@ packages:
       object.assign: 4.1.5
       object.values: 1.2.0
     dev: true
+
+  /justifiedGallery@3.8.1:
+    resolution: {integrity: sha512-qHvW4bGD9RkYYR2WfuXQK8/OdHRMTm09RJUmjWYDjAM5BS3yUpoHqXHgLjolE6m9QDReT9E6bME5YBP3VxRYtw==}
+    engines: {node: '>= 0.8.0'}
+    dependencies:
+      jquery: 3.7.1
+    dev: false
 
   /kapsule@1.14.5:
     resolution: {integrity: sha512-H0iSpTynUzZw3tgraDmReprpFRmH5oP5GPmaNsurSwLx2H5iCpOMIkp5q+sfhB4Tz/UJd1E1IbEE9Z6ksnJ6RA==}

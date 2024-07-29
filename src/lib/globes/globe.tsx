@@ -9,7 +9,7 @@ import { geoGraticule10 } from 'd3-geo';
 import * as topojson from 'topojson-client';
 import { useWindowSize } from '@/hooks/use-window-size';
 import { Album, AlbumTitle, types } from '@/types/albums';
-import { albumTitleToSlug } from '@/lib/api/slug';
+import { titleToSlug } from '@/lib/api/slug';
 import Link from 'next/link';
 import { AlbumCard } from './card';
 
@@ -452,7 +452,7 @@ function Globe({ albums }: { albums: Array<Album> }) {
                 }}
               >
                 <Link
-                  href={`/${albumTitleToSlug(album.title)}`}
+                  href={`/${titleToSlug(album.title)}`}
                   className="hover:text-gray-500"
                 >
                   {album.title}
