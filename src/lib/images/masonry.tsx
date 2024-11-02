@@ -2,10 +2,14 @@
 
 import * as React from 'react';
 import { Masonry as MasonicMasonry } from 'masonic';
+import { type RenderComponentProps } from 'masonic';
 import { useLightbox } from '../../hooks/use-lightbox';
 import { Photo } from '@/types';
 
-const MasonryItem = ({ data: { url, width, height } }: { data: Photo }) => (
+const MasonryItem = ({
+  width: itemWidth,
+  data: { url, width, height }
+}: RenderComponentProps<Photo>) => (
   <a
     href={url}
     data-pswp-width={width}
@@ -13,11 +17,16 @@ const MasonryItem = ({ data: { url, width, height } }: { data: Photo }) => (
     target="_blank"
     rel="noreferrer"
   >
-    <img src={url} alt="" />
+    <img
+      src={url}
+      width={(width / itemWidth) * width}
+      height={(width / itemWidth) * height}
+      alt=""
+    />
   </a>
 );
 
-function columnWidth() {
+function currentColumnWidth() {
   if (window.innerWidth > 2000) {
     // 3xl
     return 425;
@@ -33,6 +42,17 @@ function columnWidth() {
   }
 }
 
+function useAverageHeight(items: Array<Photo>, columnWidth: number) {
+  const heights = items.map(item => {
+    const aspectRatio = item.width / item.height;
+    const scaledHeight = columnWidth / aspectRatio;
+    return scaledHeight;
+  });
+  const averageHeight =
+    heights.reduce((sum, height) => sum + height, 0) / items.length;
+  return Math.floor(averageHeight);
+}
+
 export const Masonry = ({
   items = [],
   ...props
@@ -41,6 +61,9 @@ export const Masonry = ({
   className?: string;
 }) => {
   useLightbox(items);
+
+  const columnWidth = currentColumnWidth();
+  const averageHeight = useAverageHeight(items, columnWidth);
 
   if (items.length === 0) {
     return null;
@@ -58,8 +81,9 @@ export const Masonry = ({
         items={items}
         render={MasonryItem}
         columnGutter={window.innerWidth <= 512 ? 9 : 18}
-        columnWidth={columnWidth()}
-        itemHeightEstimate={500}
+        columnWidth={columnWidth}
+        itemHeightEstimate={averageHeight}
+        maxColumnCount={4}
         overscanBy={1}
         {...props}
       />

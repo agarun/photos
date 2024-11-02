@@ -21,7 +21,7 @@ async function Folders() {
             >
               <Link
                 href={`/folders/${titleToSlug(folder.title)}`}
-                className={`flex items-center size-full px-4 py-   text-xl text-gray-800
+                className={`flex items-center size-full px-4 py-3 text-xl text-gray-800
                   hover:text-black`}
               >
                 <span className="font-medium tracking-widest">
