@@ -13,18 +13,12 @@ function PigGrid({ items }: { items: Array<Photo> }) {
   const options = {
     containerId: 'pig',
     classPrefix: 'pig',
-    spaceBetweenImages: 8,
+    spaceBetweenImages: 12,
     transitionSpeed: 500,
     primaryImageBufferHeight: 1000,
     secondaryImageBufferHeight: 300,
     urlForSize: function (filename: string, size: number) {
       return filename;
-    },
-    getMinAspectRatio: function (lastWindowWidth: number) {
-      if (lastWindowWidth <= 640) {
-        return 1;
-      }
-      return 3;
     },
     createElement: function (url: string) {
       // PhotoSwipe elements
@@ -39,6 +33,24 @@ function PigGrid({ items }: { items: Array<Photo> }) {
       img.src = url;
       img.alt = '';
       return anchor;
+    },
+    getMinAspectRatio: function (lastWindowWidth: number) {
+      if (lastWindowWidth <= 1920) {
+        return 1;
+      } else if (lastWindowWidth <= 2560) {
+        return 1.5;
+      } else {
+        return 2;
+      }
+    },
+    getImageSize: function (lastWindowWidth: number) {
+      if (lastWindowWidth <= 1920) {
+        return 400;
+      } else if (lastWindowWidth <= 2560) {
+        return 350;
+      } else {
+        return 300;
+      }
     }
   };
 
