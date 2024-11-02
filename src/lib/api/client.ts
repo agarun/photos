@@ -178,7 +178,7 @@ export class FolderClient extends BaseClient {
     const title = this.slug;
     const query = `
 query {
-  photoFoldersCollection(where: { title: "${title}" }) {
+  photoFoldersCollection(where: { title_contains: "${title}" }) {
     items {
       title
       parentTitle
