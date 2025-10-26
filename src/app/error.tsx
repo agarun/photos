@@ -9,6 +9,10 @@ export default function Error({
 }) {
   console.error(error);
 
+  if (process.env.NODE_ENV === 'development') {
+    throw error
+  }
+
   return (
     <div>
       <h2>Something went wrong!</h2>
