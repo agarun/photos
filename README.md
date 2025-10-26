@@ -101,7 +101,7 @@ When asked, the Contentful model should be created with the API identifier `phot
 
 ² This is an array of objects, each with lat, lng, and description; e.g. `[{"lat": 40.00, "lng": 70.00, "description": "narnia"}, ...]`
 
-For more information, see the [album Zod schemas](https://github.com/agarun/photos/blob/main/src/types/albums.ts#L14). Note this field originally had ID `photoGallery`.
+For more information, see the [album Zod schemas](https://github.com/agarun/photos/blob/main/src/types/albums.ts#L14).
 
 ### Photo Folders
 
