@@ -10,54 +10,55 @@ function PigGrid({ items }: { items: Array<Photo> }) {
 
   const { width } = useWindowSize();
 
-  const options = {
-    containerId: 'pig',
-    classPrefix: 'pig',
-    spaceBetweenImages: 12,
-    transitionSpeed: 500,
-    primaryImageBufferHeight: 1000,
-    secondaryImageBufferHeight: 300,
-    urlForSize: function (filename: string, size: number) {
-      return filename;
-    },
-    createElement: function (url: string) {
-      // PhotoSwipe elements
-      const item = items.find(item => item.url == url) as Photo;
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.setAttribute('data-pswp-width', item.width.toString());
-      anchor.setAttribute('data-pswp-height', item.height.toString());
-      anchor.target = '_blank';
-      anchor.rel = 'noreferrer';
-      const img = document.createElement('img');
-      img.src = url;
-      img.alt = '';
-      return anchor;
-    },
-    getMinAspectRatio: function (lastWindowWidth: number) {
-      if (lastWindowWidth <= 1920) {
-        return 1;
-      } else if (lastWindowWidth <= 2560) {
-        return 1.5;
-      } else {
-        return 2;
-      }
-    },
-    getImageSize: function (lastWindowWidth: number) {
-      if (lastWindowWidth <= 1920) {
-        return 400;
-      } else if (lastWindowWidth <= 2560) {
-        return 350;
-      } else {
-        return 300;
-      }
-    }
-  };
-
   useEffect(() => {
     const data = items.map(item => {
       return { filename: item.url, aspectRatio: item.width / item.height };
     });
+
+    const options = {
+      containerId: 'pig',
+      classPrefix: 'pig',
+      spaceBetweenImages: 12,
+      transitionSpeed: 500,
+      primaryImageBufferHeight: 1000,
+      secondaryImageBufferHeight: 300,
+      urlForSize: function (filename: string, size: number) {
+        return filename;
+      },
+      createElement: function (url: string) {
+        // PhotoSwipe elements
+        const item = items.find(item => item.url == url) as Photo;
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.setAttribute('data-pswp-width', item.width.toString());
+        anchor.setAttribute('data-pswp-height', item.height.toString());
+        anchor.target = '_blank';
+        anchor.rel = 'noreferrer';
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = '';
+        return anchor;
+      },
+      getMinAspectRatio: function (lastWindowWidth: number) {
+        if (lastWindowWidth <= 1920) {
+          return 1;
+        } else if (lastWindowWidth <= 2560) {
+          return 1.5;
+        } else {
+          return 2;
+        }
+      },
+      getImageSize: function (lastWindowWidth: number) {
+        if (lastWindowWidth <= 1920) {
+          return 400;
+        } else if (lastWindowWidth <= 2560) {
+          return 350;
+        } else {
+          return 300;
+        }
+      }
+    };
+
     const pigGrid = new window.Pig(data, options);
     pigGrid.enable();
 
