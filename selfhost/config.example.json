@@ -1,0 +1,17 @@
+{
+  "host": "127.0.0.1",
+  "port": 3001,
+  "stateDir": "/var/lib/private-folders",
+  "publicOrigins": ["https://photos.agarun.com"],
+  "originSecret": "replace-with-long-random-string-or-null-for-local-dev",
+  "sessionSecret": "replace-with-long-random-string",
+  "sessionTtlHours": 48,
+  "albums": [
+    {
+      "slug": "example-album",
+      "root": "/srv/private-folders/example-album",
+      "passwordHash": "generate with: node hash-password.ts",
+      "authVersion": 1
+    }
+  ]
+}

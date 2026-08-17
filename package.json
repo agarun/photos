@@ -39,6 +39,9 @@
   "overrides": {
     "three-render-objects": "1.39.3"
   },
+  "knip": {
+    "ignore": ["selfhost/**"]
+  },
   "pnpm": {
     "overrides": {
       "three-render-objects": "1.39.3"

@@ -1,0 +1,13 @@
+# Create the tunnel first, for example:
+# cloudflared tunnel create private-folders
+# Then place its credentials JSON at the path below.
+tunnel: <tunnel-uuid>
+credentials-file: /etc/cloudflared/<tunnel-uuid>.json
+
+ingress:
+  - hostname: pf-origin.<zone>
+    service: http://127.0.0.1:3001
+  - service: http_status:404
+
+# After creating the tunnel, route DNS to it, for example:
+# cloudflared tunnel route dns private-folders pf-origin.<zone>

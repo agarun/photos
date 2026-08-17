@@ -1,0 +1,26 @@
+[Unit]
+Description=Private photo folders server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Node >= 24 is required: the server runs TypeScript with native type stripping.
+User=private-folders
+Group=private-folders
+WorkingDirectory=/opt/photos/selfhost
+ExecStart=/usr/bin/node server.ts --config /etc/private-folders/config.json
+Restart=on-failure
+RestartSec=5s
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+StateDirectory=private-folders
+ReadWritePaths=/var/lib/private-folders
+ReadOnlyPaths=/srv/private-folders
+RestrictAddressFamilies=AF_INET AF_INET6
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

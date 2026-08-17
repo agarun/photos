@@ -1,0 +1,16 @@
+{
+  "name": "private-folders-router",
+  "main": "worker.js",
+  "compatibility_date": "2026-08-17",
+  "workers_dev": false,
+  "vars": {
+    "PRIVATE_PREFIXES": "/folders/example-album",
+    "TUNNEL_ORIGIN": "https://pf-origin.example.com"
+  }
+  // Add one route per private album when deploying, for example:
+  // "routes": [
+  //   { "pattern": "photos.agarun.com/folders/<slug>*", "zone_name": "agarun.com" }
+  // ],
+  // Set the shared secret separately:
+  // wrangler secret put ORIGIN_SECRET
+}

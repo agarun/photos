@@ -1,0 +1,630 @@
+@import url('./photoswipe.css');
+
+@font-face {
+  font-family: 'TASA Orbiter';
+  src: url('./TASAOrbiterVF.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  font-family: 'TASA Orbiter', ui-sans-serif, system-ui, sans-serif;
+  color: #1f2937;
+  background: #fff;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+body {
+  background: #fff;
+  color: #1f2937;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+select {
+  cursor: pointer;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+::selection {
+  background: #e5b3c3;
+}
+
+a {
+  color: inherit;
+}
+
+.pf-page {
+  padding-top: clamp(3rem, 12vh, 12rem);
+}
+
+.pf-page[data-density='s'] {
+  --pf-section-gap: 4rem;
+  --pf-section-min-height: 16rem;
+}
+
+.pf-page[data-density='m'] {
+  --pf-section-gap: 5rem;
+  --pf-section-min-height: 20rem;
+}
+
+.pf-page[data-density='l'] {
+  --pf-section-gap: 6rem;
+  --pf-section-min-height: 24rem;
+}
+
+.pf-container {
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.pf-header {
+  position: relative;
+  min-height: 7rem;
+  margin-bottom: 6rem;
+}
+
+.pf-header h1 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 2.25rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.pf-header:focus {
+  outline: none;
+}
+
+.pf-meta {
+  margin: 0 0 4rem;
+  color: #9ca3af;
+}
+
+.pf-section {
+  min-height: var(--pf-section-min-height, 24rem);
+  margin-bottom: var(--pf-section-gap, 8rem);
+}
+
+.pf-section-title {
+  margin: 0 0 1.5rem;
+  color: #4b5563;
+  font-size: 1.625rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.pf-grid {
+  position: relative;
+  width: 100%;
+}
+
+.pf-grid > a {
+  display: block;
+}
+
+.pig-figure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  overflow: hidden;
+  background-color: #f3f4f6;
+}
+
+.pig-figure img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: 0.5s ease opacity;
+}
+
+.pig-figure img.pig-thumbnail {
+  position: relative;
+  left: auto;
+  width: auto;
+  filter: blur(30px);
+}
+
+.pig-figure img.pig-loaded {
+  opacity: 1;
+}
+
+.pf-footer {
+  display: grid;
+  justify-items: start;
+  gap: 0.5rem;
+  margin-bottom: 8rem;
+  color: #9ca3af;
+}
+
+.pf-footer a,
+.pf-footer-views {
+  font-size: 1rem;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.pf-footer a:hover {
+  color: #4b5563;
+}
+
+.pf-controls {
+  position: absolute;
+  top: 4rem;
+  left: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  width: min(100%, 42rem);
+  min-height: 2.5rem;
+  margin: 0;
+  padding: 0.5rem 0;
+  color: #9ca3af;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.pf-group {
+  flex: 0 0 auto;
+}
+
+.pf-toc {
+  margin: 0;
+  padding: 0;
+}
+
+.pf-sidebar {
+  position: static;
+  width: auto;
+  margin-bottom: clamp(6rem, 10vh, 9rem);
+}
+
+.pf-sidebar-inner {
+  position: static;
+  width: 100%;
+}
+
+.pf-toc-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pf-toc a,
+.pf-sidebar-guestbook {
+  display: block;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  text-align: left;
+  color: #9ca3af;
+  text-decoration: none;
+}
+
+.pf-toc a:hover,
+.pf-sidebar-guestbook:hover,
+.pf-toc a[aria-current='location'] {
+  color: #1f2937;
+}
+
+.pf-sidebar-guestbook {
+  margin-top: 2rem;
+}
+
+.pf-group {
+  display: inline-flex;
+  gap: 0.75rem;
+}
+
+.pf-group button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #9ca3af;
+}
+
+.pf-group button:hover {
+  color: #4b5563;
+}
+
+.pf-group button[aria-pressed='true'] {
+  color: #1f2937;
+}
+
+.pf-header:hover .pf-controls,
+.pf-header:focus .pf-controls,
+.pf-header:focus-within .pf-controls {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.pf-controls button:focus-visible,
+.pf-toc a:focus-visible,
+.pf-login input:focus-visible,
+.pf-guestbook input:focus-visible,
+.pf-guestbook textarea:focus-visible,
+.pf-guestbook button:focus-visible {
+  outline: 2px solid #1f2937;
+  outline-offset: 2px;
+}
+
+.pf-guestbook {
+  margin: 0 0 4rem;
+  color: #9ca3af;
+}
+
+.pf-guestbook-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.pf-guestbook-summary::-webkit-details-marker {
+  display: none;
+}
+
+.pf-guestbook-toggle::before {
+  content: '+';
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.pf-guestbook[open] .pf-guestbook-toggle::before {
+  content: '−';
+}
+
+.pf-guestbook-summary:hover {
+  color: #4b5563;
+}
+
+.pf-guestbook-content {
+  max-width: 36rem;
+  padding: 0.75rem 0 1.5rem;
+}
+
+.pf-guestbook-empty {
+  margin: 0 0 2rem;
+}
+
+.pf-guestbook-entries {
+  display: grid;
+  gap: 1.25rem;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.pf-guestbook-entry-text {
+  margin: 0;
+  color: #4b5563;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.pf-guestbook-entry-name {
+  margin: 0.35rem 0 0;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+.pf-guestbook-edit-form {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.pf-guestbook-entry-editable {
+  display: block;
+  width: 100%;
+  min-height: 1.5em;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0.2rem;
+  background: transparent;
+  color: inherit;
+  cursor: text;
+  outline: none;
+}
+
+.pf-guestbook-entry-text.pf-guestbook-entry-editable {
+  color: #4b5563;
+  resize: none;
+  overflow: hidden;
+}
+
+.pf-guestbook-entry-editable[data-guestbook-field='username'] {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.pf-guestbook-entry-editable:hover,
+.pf-guestbook-entry-editable:focus {
+  background: #f8fafc;
+}
+
+.pf-guestbook-entry--editable .pf-guestbook-entry-text {
+  margin-top: 0.25rem;
+}
+
+.pf-guestbook-edit-status {
+  min-height: 0;
+  color: #d1d5db;
+  font-size: 0.75rem;
+}
+
+.pf-guestbook-form {
+  display: grid;
+  gap: 0.5rem;
+  color: #6b7280;
+}
+
+.pf-guestbook-field {
+  display: grid;
+}
+
+.pf-guestbook-field input,
+.pf-guestbook-field textarea {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0;
+  border: 0;
+  border-bottom: 1px solid #d1d5db;
+  border-radius: 0;
+  background: transparent;
+  color: #1f2937;
+  resize: vertical;
+}
+
+.pf-guestbook-form button {
+  justify-self: start;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid #9ca3af;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: #1f2937;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.pf-guestbook-form button:hover {
+  border-color: #4b5563;
+  color: #4b5563;
+}
+
+.pf-login {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 1rem;
+}
+
+.pf-login input {
+  display: block;
+  width: min(100%, 18rem);
+  padding: 0.5rem 0;
+  border: 0;
+  border-bottom: 1px solid #d1d5db;
+  border-radius: 0;
+  background: transparent;
+  color: #1f2937;
+}
+
+.pf-login input::placeholder {
+  color: #9ca3af;
+}
+
+.pf-guestbook-form input::placeholder,
+.pf-guestbook-form textarea::placeholder {
+  color: #9ca3af;
+}
+
+.pf-error {
+  margin: 0.75rem 0 0;
+  color: #b91c1c;
+  font-size: 0.875rem;
+}
+
+.photoswipe--custom {
+  --pswp-bg: white !important;
+}
+
+@media (min-width: 640px) {
+  .pf-page {
+    padding-top: clamp(6rem, 16vh, 12rem);
+  }
+}
+
+@media (min-width: 640px) {
+  .pf-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 20;
+    width: 11rem;
+    margin: 0;
+  }
+
+  .pf-sidebar-inner {
+    position: absolute;
+    top: clamp(4rem, 18vh, 12rem);
+    right: 1rem;
+    width: min(11rem, calc(100% - 1rem));
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .pf-sidebar:hover .pf-sidebar-inner,
+  .pf-sidebar:focus-within .pf-sidebar-inner {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  .pf-toc a {
+    text-align: right;
+  }
+
+  .pf-sidebar-guestbook {
+    text-align: right;
+  }
+
+  .pf-sidebar {
+    margin-bottom: 0;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1439px) {
+  .pf-container {
+    width: calc(100% - 12rem);
+    max-width: 72rem;
+    margin-left: 12rem;
+    margin-right: 0;
+  }
+}
+
+@media (min-width: 1440px) {
+  .pf-sidebar {
+    width: calc((100vw - 72rem) / 2);
+  }
+}
+
+@media (max-width: 639px) {
+  .pf-page {
+    padding-top: 2rem;
+  }
+
+  .pf-container {
+    padding: 0 0.5rem;
+  }
+
+  .pf-header {
+    min-height: 0;
+    margin-bottom: 3rem;
+  }
+
+  .pf-header h1 {
+    font-size: 2rem;
+  }
+
+  .pf-controls {
+    position: static;
+    width: 100%;
+    margin-top: 1.25rem;
+    padding: 0;
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  .pf-sidebar {
+    position: static;
+    width: auto;
+    margin-bottom: 3.5rem;
+  }
+
+  .pf-sidebar-inner {
+    position: static;
+    width: 100%;
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+    transform: none;
+  }
+
+  .pf-toc {
+    width: 100%;
+    overflow-x: auto;
+    padding: 0.25rem 0;
+    scrollbar-width: none;
+  }
+
+  .pf-toc::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pf-toc-list {
+    display: flex;
+    flex-wrap: wrap;
+    width: max-content;
+    gap: 0.5rem 1.25rem;
+  }
+
+  .pf-toc a,
+  .pf-sidebar-guestbook {
+    font-size: 0.9375rem;
+    white-space: nowrap;
+    text-align: left;
+  }
+
+  .pf-sidebar-guestbook {
+    margin-top: 0.75rem;
+    padding: 0.25rem 0;
+  }
+
+  .pf-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .pf-section {
+    min-height: 0;
+    margin-bottom: var(--pf-section-gap, 6rem);
+  }
+
+  .pf-section-title {
+    margin-bottom: 1rem;
+  }
+
+  .pf-grid > a img {
+    display: block;
+    height: auto;
+    width: 100%;
+  }
+
+  .pf-footer {
+    justify-items: start;
+    margin-bottom: 6rem;
+  }
+}
