@@ -80,12 +80,13 @@ function PigGrid({ items }: { items: Array<Photo> }) {
           {items.map(item => (
             <a
               key={item.url}
-              data-pwsp-width={item.width}
-              data-pwsp-height={item.height}
+              href={item.url}
+              data-pswp-width={item.width}
+              data-pswp-height={item.height}
               target="_blank"
               rel="noreferrer"
             >
-              <img src={item.url} alt="" />
+              <img src={item.url} alt="" width={item.width} height={item.height} loading="lazy" decoding="async" />
             </a>
           ))}
         </div>
