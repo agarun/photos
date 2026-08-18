@@ -121,10 +121,22 @@ function updateButtons(state) {
     );
   });
 
-  document.querySelectorAll('[data-filter]').forEach(button => {
+  document
+    .querySelectorAll('[data-filter]:not(.pf-mobile-filter)')
+    .forEach(button => {
+      button.setAttribute(
+        'aria-pressed',
+        String(button.dataset.filter === state.filter)
+      );
+    });
+
+  document.querySelectorAll('.pf-mobile-filter').forEach(button => {
+    const showFavorites = state.filter !== 'favorites';
+    button.dataset.filter = showFavorites ? 'favorites' : 'all';
+    button.textContent = showFavorites ? 'Show Just My Favorites' : 'Show All';
     button.setAttribute(
-      'aria-pressed',
-      String(button.dataset.filter === state.filter)
+      'aria-label',
+      showFavorites ? 'Show just my favorites' : 'Show all photos'
     );
   });
 }
@@ -149,11 +161,11 @@ function updateSectionVisibility(state) {
     );
     section.element.hidden = section.visiblePhotos.length === 0;
 
-    const tocLink = state.tocLinks.get(section.element.id);
-    if (tocLink) {
+    const tocLinks = state.tocLinks.get(section.element.id) ?? [];
+    tocLinks.forEach(tocLink => {
       const tocItem = tocLink.closest('li');
       if (tocItem) tocItem.hidden = section.element.hidden;
-    }
+    });
 
     if (!section.element.hidden) {
       visibleSections.push(section);
@@ -165,8 +177,6 @@ function updateSectionVisibility(state) {
 }
 
 function updateActiveTocLink(state) {
-  if (state.tocLinks.size === 0) return;
-
   const visibleSections = state.visibleSections ?? [];
   const currentSection = visibleSections.reduce((active, section) => {
     const rect = section.element.getBoundingClientRect();
@@ -175,8 +185,27 @@ function updateActiveTocLink(state) {
       : active;
   }, visibleSections[0]);
 
-  state.tocLinks.forEach((link, id) => {
-    if (id === currentSection?.element.id) {
+  const guestbook = document.getElementById('guestbook');
+  const guestbookIsActive =
+    guestbook?.open &&
+    guestbook.getBoundingClientRect().top <=
+      Math.min(320, window.innerHeight * 0.5);
+  const currentSectionId = guestbookIsActive
+    ? undefined
+    : currentSection?.element.id;
+
+  state.tocLinks.forEach((links, id) => {
+    links.forEach(link => {
+      if (id === currentSectionId) {
+        link.setAttribute('aria-current', 'location');
+      } else {
+        link.removeAttribute('aria-current');
+      }
+    });
+  });
+
+  document.querySelectorAll('a[href="#guestbook"]').forEach(link => {
+    if (guestbookIsActive) {
       link.setAttribute('aria-current', 'location');
     } else {
       link.removeAttribute('aria-current');
@@ -427,6 +456,10 @@ function rebuild(state, preserveScroll) {
   const rebuildId = ++state.rebuildId;
   const anchor = preserveScroll ? captureScrollAnchor(state) : null;
   const nextMode = isDesktop() ? 'desktop' : 'mobile';
+  if (nextMode === 'mobile' && state.density !== 'l') {
+    state.density = 'l';
+    updateButtons(state);
+  }
   state.page.dataset.density = state.density;
 
   const ready =
@@ -518,7 +551,6 @@ function bindGuestbookEditing() {
             }
           });
           if (!response.ok) throw new Error('Guestbook update failed.');
-          if (version === editVersion && status) status.textContent = 'Saved';
         } catch {
           if (version === editVersion && status) {
             status.textContent = 'Could not save. Try again.';
@@ -538,26 +570,40 @@ function bindGuestbookEditing() {
   });
 }
 
-function bindGuestbookNavigation() {
+function bindSingleLineGuestbookFields() {
+  document.querySelectorAll('[data-guestbook-single-line]').forEach(field => {
+    field.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.isComposing) {
+        event.preventDefault();
+      }
+    });
+  });
+}
+
+function bindGuestbookNavigation(state) {
   const guestbook = document.getElementById('guestbook');
   if (!guestbook) return;
 
   const openGuestbook = () => {
     guestbook.open = true;
-    guestbook.scrollIntoView({ behavior: 'auto' });
+    guestbook.scrollIntoView({ behavior: 'auto', block: 'start' });
+    document.querySelector('.pf-mobile-menu')?.removeAttribute('open');
+    updateActiveTocLink(state);
   };
 
   if (window.location.hash === '#guestbook') {
     openGuestbook();
   }
 
-  document
-    .querySelector('.pf-sidebar-guestbook')
-    ?.addEventListener('click', event => {
+  document.querySelectorAll('a[href="#guestbook"]').forEach(link => {
+    link.addEventListener('click', event => {
       event.preventDefault();
       window.history.replaceState(null, '', '#guestbook');
       openGuestbook();
     });
+  });
+
+  guestbook.addEventListener('toggle', () => updateActiveTocLink(state));
 }
 
 function bindControls(state) {
@@ -595,17 +641,19 @@ function bindControls(state) {
     });
   });
 
-  state.tocLinks.forEach((link, sectionId) => {
-    link.addEventListener('click', event => {
-      event.preventDefault();
-      const section = document.getElementById(sectionId);
-      if (!section || section.hidden) {
-        return;
-      }
+  state.tocLinks.forEach((links, sectionId) => {
+    links.forEach(link => {
+      link.addEventListener('click', event => {
+        event.preventDefault();
+        const section = document.getElementById(sectionId);
+        if (!section || section.hidden) {
+          return;
+        }
 
-      section.scrollIntoView({ behavior: 'smooth' });
-      window.history.replaceState(null, '', `#${section.id}`);
-      updateActiveTocLink(state);
+        section.scrollIntoView({ behavior: 'smooth' });
+        window.history.replaceState(null, '', '#' + section.id);
+        updateActiveTocLink(state);
+      });
     });
   });
 }
@@ -649,19 +697,24 @@ function start() {
     throw new Error('Album controls were not found.');
   }
 
+  const tocLinks = new Map();
+  document.querySelectorAll('.pf-toc a[data-section-id]').forEach(link => {
+    const sectionId = link.dataset.sectionId;
+    if (!sectionId) return;
+    const links = tocLinks.get(sectionId) ?? [];
+    links.push(link);
+    tocLinks.set(sectionId, links);
+  });
+
   const state = {
     albumData,
     page: document.querySelector('.pf-page'),
     assetBase: `/folders/${albumData.slug}/_assets/`,
     mediaBase: albumData.mediaBase.replace(/\/$/, ''),
     controls,
-    tocLinks: new Map(
-      Array.from(document.querySelectorAll('.pf-toc a[data-section-id]')).map(
-        link => [link.dataset.sectionId, link]
-      )
-    ),
+    tocLinks,
     sections: makeSectionRecords(albumData),
-    density: readDensity(),
+    density: isDesktop() ? readDensity() : 'l',
     filter: 'all',
     mode: null,
     rebuildId: 0
@@ -678,8 +731,9 @@ function start() {
   });
 
   bindControls(state);
-  bindGuestbookNavigation();
+  bindGuestbookNavigation(state);
   bindGuestbookEditing();
+  bindSingleLineGuestbookFields();
   bindScroll(state);
   bindResize(state);
 

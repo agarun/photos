@@ -98,6 +98,17 @@ a {
   line-height: 1.15;
 }
 
+.pf-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pf-mobile-menu {
+  display: none;
+}
+
 .pf-header:focus {
   outline: none;
 }
@@ -236,7 +247,8 @@ a {
 
 .pf-toc a:hover,
 .pf-sidebar-guestbook:hover,
-.pf-toc a[aria-current='location'] {
+.pf-toc a[aria-current='location'],
+.pf-sidebar-guestbook[aria-current='location'] {
   color: #1f2937;
 }
 
@@ -315,6 +327,10 @@ a {
   color: #4b5563;
 }
 
+.pf-guestbook[open] .pf-guestbook-summary {
+  color: #1f2937;
+}
+
 .pf-guestbook-content {
   max-width: 36rem;
   padding: 0.75rem 0 1.5rem;
@@ -342,7 +358,7 @@ a {
 .pf-guestbook-entry-name {
   margin: 0.35rem 0 0;
   color: #9ca3af;
-  font-size: 0.875rem;
+  font-size: 1rem;
 }
 
 .pf-guestbook-edit-form {
@@ -357,20 +373,41 @@ a {
   margin: 0;
   padding: 0;
   border: 0;
-  border-radius: 0.2rem;
+  border-radius: 0;
   background: transparent;
   color: inherit;
+  font: inherit;
   cursor: text;
   outline: none;
 }
 
 .pf-guestbook-entry-text.pf-guestbook-entry-editable {
+  min-height: 1.5em;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: #4b5563;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
   resize: none;
   overflow: hidden;
 }
 
 .pf-guestbook-entry-editable[data-guestbook-field='username'] {
+  display: block;
+  width: 100%;
+  min-height: 1.5em;
+  margin: 0 0 0.35rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #9ca3af;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  cursor: text;
   max-width: 100%;
   overflow: hidden;
   white-space: nowrap;
@@ -379,7 +416,7 @@ a {
 
 .pf-guestbook-entry-editable:hover,
 .pf-guestbook-entry-editable:focus {
-  background: #f8fafc;
+  background: transparent;
 }
 
 .pf-guestbook-entry--editable .pf-guestbook-entry-text {
@@ -406,11 +443,10 @@ a {
 .pf-guestbook-field textarea {
   display: block;
   width: 100%;
-  padding: 0.5rem 0;
-  border: 0;
-  border-bottom: 1px solid #d1d5db;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #1f2937;
   border-radius: 0;
-  background: transparent;
+  background: #fff;
   color: #1f2937;
   resize: vertical;
 }
@@ -418,17 +454,17 @@ a {
 .pf-guestbook-form button {
   justify-self: start;
   margin-top: 0.5rem;
-  padding: 0.35rem 0.7rem;
-  border: 1px solid #9ca3af;
-  border-radius: 0.35rem;
-  background: transparent;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #1f2937;
+  border-radius: 0;
+  background: #f9f9fa;
   color: #1f2937;
   font-size: 0.875rem;
   cursor: pointer;
 }
 
 .pf-guestbook-form button:hover {
-  border-color: #4b5563;
+  background: #e5e7eb;
   color: #4b5563;
 }
 
@@ -442,11 +478,10 @@ a {
 .pf-login input {
   display: block;
   width: min(100%, 18rem);
-  padding: 0.5rem 0;
-  border: 0;
-  border-bottom: 1px solid #d1d5db;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #1f2937;
   border-radius: 0;
-  background: transparent;
+  background: #fff;
   color: #1f2937;
 }
 
@@ -486,7 +521,7 @@ a {
 
   .pf-sidebar-inner {
     position: absolute;
-    top: clamp(4rem, 18vh, 12rem);
+    top: min(calc(clamp(6rem, 16vh, 12rem) + 13rem), calc(100vh - 12rem));
     right: 1rem;
     width: min(11rem, calc(100% - 1rem));
     opacity: 0;
@@ -514,12 +549,37 @@ a {
   }
 }
 
-@media (min-width: 640px) and (max-width: 1439px) {
+@media (min-width: 640px) and (max-width: 1023px) {
   .pf-container {
     width: calc(100% - 12rem);
     max-width: 72rem;
     margin-left: 12rem;
     margin-right: 0;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .pf-container {
+    width: 100%;
+    max-width: 72rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .pf-sidebar {
+    display: none;
+    width: 4.5rem;
+  }
+
+  .pf-sidebar-inner {
+    right: auto;
+    left: 0;
+    width: 11rem;
+  }
+
+  .pf-toc a,
+  .pf-sidebar-guestbook {
+    text-align: left;
   }
 }
 
@@ -531,7 +591,7 @@ a {
 
 @media (max-width: 639px) {
   .pf-page {
-    padding-top: 2rem;
+    padding-top: 4rem;
   }
 
   .pf-container {
@@ -540,66 +600,97 @@ a {
 
   .pf-header {
     min-height: 0;
-    margin-bottom: 3rem;
+    margin-bottom: 1rem;
   }
 
   .pf-header h1 {
     font-size: 2rem;
   }
 
-  .pf-controls {
-    position: static;
-    width: 100%;
-    margin-top: 1.25rem;
+  .pf-mobile-menu {
+    position: relative;
+    display: block;
+    margin-top: 0;
+  }
+
+  .pf-mobile-menu-summary {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    color: #9ca3af;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .pf-mobile-menu-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .pf-mobile-menu-summary span {
+    font-size: 1.75rem;
+    line-height: 1;
+  }
+
+  .pf-mobile-menu[open] .pf-mobile-menu-summary {
+    color: #1f2937;
+  }
+
+  .pf-mobile-menu-panel {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: min(18rem, calc(100vw - 1rem));
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    box-shadow: 0 0.5rem 1.5rem rgb(31 41 55 / 8%);
+  }
+
+  .pf-mobile-menu-controls {
+    display: block;
+  }
+
+  .pf-mobile-menu .pf-group {
+    display: block;
+  }
+
+  .pf-mobile-menu .pf-toc {
+    width: auto;
+    overflow: visible;
     padding: 0;
-    opacity: 1;
-    pointer-events: auto;
-    visibility: visible;
+  }
+
+  .pf-mobile-menu .pf-toc-list {
+    display: grid;
+    width: auto;
+    gap: 1rem;
+  }
+
+  .pf-mobile-menu .pf-mobile-filter,
+  .pf-mobile-menu .pf-toc a,
+  .pf-mobile-menu .pf-sidebar-guestbook {
+    padding: 0.1rem 0;
+    font-size: 1rem;
+    line-height: 1.4;
+    text-align: left;
+  }
+
+  .pf-mobile-menu .pf-sidebar-guestbook {
+    margin-top: 0;
+  }
+
+  .pf-controls {
+    display: none !important;
   }
 
   .pf-sidebar {
     position: static;
-    width: auto;
-    margin-bottom: 3.5rem;
-  }
-
-  .pf-sidebar-inner {
-    position: static;
-    width: 100%;
-    opacity: 1;
-    pointer-events: auto;
-    visibility: visible;
-    transform: none;
-  }
-
-  .pf-toc {
-    width: 100%;
-    overflow-x: auto;
-    padding: 0.25rem 0;
-    scrollbar-width: none;
-  }
-
-  .pf-toc::-webkit-scrollbar {
     display: none;
-  }
-
-  .pf-toc-list {
-    display: flex;
-    flex-wrap: wrap;
-    width: max-content;
-    gap: 0.5rem 1.25rem;
-  }
-
-  .pf-toc a,
-  .pf-sidebar-guestbook {
-    font-size: 0.9375rem;
-    white-space: nowrap;
-    text-align: left;
-  }
-
-  .pf-sidebar-guestbook {
-    margin-top: 0.75rem;
-    padding: 0.25rem 0;
   }
 
   .pf-grid {

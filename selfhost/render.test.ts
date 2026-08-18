@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { test } from 'node:test';
 
 import { renderAlbumPage } from './render.ts';
@@ -50,6 +52,9 @@ test('renders inline controls and a contents nav for multiple subfolders', () =>
   assert.match(html, /aria-label="Table of contents"/);
   assert.match(html, /href="#section-bergen"/);
   assert.match(html, /href="#section-fjords"/);
+  assert.match(html, /Show Just My Favorites/);
+  assert.doesNotMatch(html, /class="pf-mobile-filter"[^>]+data-density/);
+  assert.equal((html.match(/data-density=/g) ?? []).length, 3);
 });
 
 test('does not render a contents nav for a single titled subfolder', () => {
@@ -61,4 +66,43 @@ test('does not render a contents nav for a single titled subfolder', () => {
   });
 
   assert.doesNotMatch(html, /aria-label="Table of contents"/);
+});
+
+test('guestbook usernames stay single-line and Enter cannot submit them', async () => {
+  const html = renderAlbumPage({
+    manifest: manifest([{ id: 'main', title: '', photos: [photo('cover')] }]),
+    pageState: {
+      views: 1,
+      entries: [
+        { id: 'entry-1', username: 'Alice', text: 'Hello', editable: true }
+      ]
+    }
+  });
+  const usernameFields = html.match(
+    /<input[^>]+data-guestbook-single-line[^>]*>/g
+  );
+
+  assert.equal(usernameFields?.length, 2);
+  for (const field of usernameFields ?? []) {
+    assert.match(field, /type="text"/);
+    assert.match(field, /enterkeyhint="next"/);
+  }
+
+  assert.match(
+    html,
+    /<textarea[^>]+class="pf-guestbook-entry-text pf-guestbook-entry-editable"[^>]+rows="1"/
+  );
+  assert.ok(
+    html.indexOf('data-guestbook-field="username"') <
+      html.indexOf('data-guestbook-field="text"')
+  );
+
+  const script = await readFile(
+    join(import.meta.dirname, 'assets', 'album.js'),
+    'utf8'
+  );
+  assert.match(script, /data-guestbook-single-line/);
+  assert.match(script, /event\.key === 'Enter'/);
+  assert.match(script, /event\.preventDefault\(\)/);
+  assert.doesNotMatch(script, /status\.textContent = 'Saved'/);
 });

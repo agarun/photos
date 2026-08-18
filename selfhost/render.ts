@@ -68,8 +68,8 @@ ${[...opts.pageState.entries]
             <input type="hidden" name="entryId" value="${escapeHtml(entryId)}">
             <input type="hidden" name="username" value="${escapeHtml(entry.username)}" data-guestbook-hidden="username">
             <input type="hidden" name="text" value="${escapeHtml(entry.text)}" data-guestbook-hidden="text">
+            <input class="pf-guestbook-entry-name pf-guestbook-entry-editable" type="text" maxlength="64" aria-label="Edit your guestbook name" autocomplete="name" enterkeyhint="next" value="${escapeHtml(entry.username)}" data-guestbook-field="username" data-guestbook-single-line>
             <textarea class="pf-guestbook-entry-text pf-guestbook-entry-editable" rows="1" maxlength="2000" aria-label="Edit your guestbook message" data-guestbook-field="text">${escapeHtml(entry.text)}</textarea>
-            <input class="pf-guestbook-entry-name pf-guestbook-entry-editable" type="text" maxlength="64" aria-label="Edit your guestbook name" autocomplete="name" value="${escapeHtml(entry.username)}" data-guestbook-field="username">
             <span class="pf-guestbook-edit-status" aria-live="polite" data-guestbook-status></span>
           </form>
         </li>`;
@@ -86,7 +86,7 @@ ${[...opts.pageState.entries]
 ${entries}
         <form class="pf-guestbook-form" method="post" action="/folders/${opts.slug}/_guestbook" id="guestbook-form">
           <label class="pf-guestbook-field">
-            <input name="username" type="text" placeholder="Your name" aria-label="Username" maxlength="64" autocomplete="name" required value="${escapeHtml(form.username)}">
+            <input name="username" type="text" placeholder="Your name" aria-label="Username" maxlength="64" autocomplete="name" enterkeyhint="next" required value="${escapeHtml(form.username)}" data-guestbook-single-line>
           </label>
           <label class="pf-guestbook-field">
             <textarea name="text" rows="3" placeholder="Your message" aria-label="Message" maxlength="2000" required>${escapeHtml(form.text)}</textarea>
@@ -205,7 +205,7 @@ ${heading}      <div class="pf-grid"></div>
     .join('\n');
 
   const tableOfContents = showTableOfContents
-    ? `      <nav class="pf-toc" id="pf-toc" aria-label="Table of contents">
+    ? `      <nav class="pf-toc" aria-label="Table of contents">
         <ol class="pf-toc-list">
 ${tocSections
   .map(
@@ -217,6 +217,24 @@ ${tocSections
       </nav>`
     : '';
 
+  const mobileMenu =
+    '      <details class="pf-mobile-menu">\n' +
+    '        <summary class="pf-mobile-menu-summary" aria-label="Open album menu">\n' +
+    '          <span aria-hidden="true">&#8943;</span>\n' +
+    '        </summary>\n' +
+    '        <div class="pf-mobile-menu-panel">\n' +
+    (hasFavorites
+      ? '          <div class="pf-mobile-menu-controls">\n' +
+        '            <div class="pf-group" role="group" aria-label="Filter photos">\n' +
+        '              <button class="pf-mobile-filter" type="button" data-filter="favorites" aria-label="Show just my favorites">Show Just My Favorites</button>\n' +
+        '            </div>\n' +
+        '          </div>\n'
+      : '') +
+    (tableOfContents ? tableOfContents + '\n' : '') +
+    '          <a class="pf-sidebar-guestbook" href="#guestbook">Guestbook</a>\n' +
+    '        </div>\n' +
+    '      </details>';
+
   const sidebar = `  <aside class="pf-sidebar" aria-label="Album navigation">
     <div class="pf-sidebar-inner">
 ${tableOfContents}
@@ -227,7 +245,10 @@ ${tableOfContents}
   const body = `<main class="pf-page">
   <div class="pf-container">
     <header class="pf-header" id="top" tabindex="0">
-      <h1>${escapeHtml(manifest.title)}</h1>
+      <div class="pf-header-row">
+        <h1>${escapeHtml(manifest.title)}</h1>
+${mobileMenu}
+      </div>
 ${controls}
     </header>
     <noscript><p class="pf-meta">This album needs JavaScript to display photos.</p></noscript>
