@@ -24,6 +24,11 @@ export default {
     requestUrl.host = originUrl.host;
 
     const headers = new Headers(request.headers);
+    const clientIp = headers.get('CF-Connecting-IP');
+    headers.delete('X-Real-IP');
+    headers.delete('X-Client-IP');
+    headers.delete('CF-Connecting-IP');
+    if (clientIp !== null) headers.set('X-Client-IP', clientIp);
     headers.set('X-Origin-Auth', env.ORIGIN_SECRET);
 
     const requestInit = {

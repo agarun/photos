@@ -1,22 +1,12 @@
-// Password hashing (scrypt) and signed session tokens. Zero dependencies.
-//
-// Hash format: scrypt$<log2N>$<r>$<p>$<saltBase64url>$<hashBase64url>
-// Session token: base64url(payloadJson) + '.' + base64url(hmacSha256(payload))
-
-import {
-  createHmac,
-  randomBytes,
-  scrypt,
-  timingSafeEqual
-} from 'node:crypto';
+import { createHmac, randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
 
 const SCRYPT_LOG2_N = 17;
 const SCRYPT_R = 8;
 const SCRYPT_P = 1;
 const SCRYPT_KEYLEN = 32;
-// maxmem must exceed 128 * N * r; allow headroom for parameter upgrades.
+// Keep enough headroom for the configured scrypt parameters.
 const SCRYPT_MAXMEM = 512 * 1024 * 1024;
-// Upper bounds when verifying, so a mistyped config entry cannot exhaust RAM.
+// Reject malformed config hashes before they can request excessive memory.
 const MAX_LOG2_N = 20;
 const MAX_R = 16;
 const MAX_P = 4;
@@ -41,7 +31,13 @@ function scryptAsync(
 
 export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16);
-  const key = await scryptAsync(password, salt, SCRYPT_LOG2_N, SCRYPT_R, SCRYPT_P);
+  const key = await scryptAsync(
+    password,
+    salt,
+    SCRYPT_LOG2_N,
+    SCRYPT_R,
+    SCRYPT_P
+  );
   const parts = [
     'scrypt',
     String(SCRYPT_LOG2_N),
@@ -63,9 +59,15 @@ export async function verifyPassword(
   const r = Number(parts[2]);
   const p = Number(parts[3]);
   if (
-    !Number.isInteger(log2N) || log2N < 10 || log2N > MAX_LOG2_N ||
-    !Number.isInteger(r) || r < 1 || r > MAX_R ||
-    !Number.isInteger(p) || p < 1 || p > MAX_P
+    !Number.isInteger(log2N) ||
+    log2N < 10 ||
+    log2N > MAX_LOG2_N ||
+    !Number.isInteger(r) ||
+    r < 1 ||
+    r > MAX_R ||
+    !Number.isInteger(p) ||
+    p < 1 ||
+    p > MAX_P
   ) {
     return false;
   }
@@ -77,9 +79,9 @@ export async function verifyPassword(
 }
 
 export type SessionPayload = {
-  s: string; // album slug
-  v: number; // album authVersion at signing time
-  exp: number; // unix seconds
+  s: string;
+  v: number;
+  exp: number;
 };
 
 function hmac(data: string, secret: string): Buffer {
@@ -112,7 +114,11 @@ export function verifySession(
   }
   if (typeof payload !== 'object' || payload === null) return null;
   const { s, v, exp } = payload as Record<string, unknown>;
-  if (typeof s !== 'string' || typeof v !== 'number' || typeof exp !== 'number') {
+  if (
+    typeof s !== 'string' ||
+    typeof v !== 'number' ||
+    typeof exp !== 'number'
+  ) {
     return null;
   }
   if (!Number.isFinite(exp) || exp <= now) return null;

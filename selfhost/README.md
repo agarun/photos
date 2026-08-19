@@ -88,7 +88,7 @@ Set these fields:
     {
       "slug": "norway-2026",
       "root": "/srv/private-folders/norway-2026",
-      "passwordHash": "<hash-from-hash-password.ts>",
+      "passwordHash": "<generated-password-hash>",
       "authVersion": 1
     }
   ]
@@ -103,7 +103,7 @@ Use a different `slug` for each album.
 Hash each album password with this command:
 
 ```sh
-node selfhost/hash-password.ts
+node selfhost/server/hash-password.ts
 ```
 
 Enter the password twice when the command prompts you.
@@ -112,7 +112,9 @@ The command uses scrypt with the native `node:crypto` module.
 
 Set a long random value for `sessionSecret`.
 Set `originSecret` to the same long random value on the Worker and the server.
-Set `originSecret` to `null` only for direct local testing.
+Never set `originSecret` to `null` in a deployed configuration. For direct local
+testing only, set `originSecret` to `null` and explicitly set
+`allowInsecureLocalOrigin` to `true`; that mode must remain bound to loopback.
 Bump an album's `authVersion` after a password change.
 The new version invalidates all sessions for that album.
 
@@ -130,13 +132,13 @@ node selfhost/server.ts --config selfhost/config.json
 The server listens on the configured host and port.
 Open `/folders/<slug>` after the Worker or local proxy reaches the server.
 
-| Method | Route | Purpose |
-| --- | --- | --- |
-| `GET` | `/folders/:slug` | Show the login page or the authenticated album. |
-| `POST` | `/folders/:slug/_session` | Check the password and create an album session. |
-| `POST` | `/folders/:slug/_guestbook` | Add one guestbook entry for the authenticated visitor. |
-| `GET` | `/folders/:slug/_media/:id.webp` | Serve one protected WebP from the manifest. |
-| `GET` | `/folders/:slug/_assets/:name` | Serve a whitelisted user-interface asset. |
+| Method | Route                            | Purpose                                                |
+| ------ | -------------------------------- | ------------------------------------------------------ |
+| `GET`  | `/folders/:slug`                 | Show the login page or the authenticated album.        |
+| `POST` | `/folders/:slug/_session`        | Check the password and create an album session.        |
+| `POST` | `/folders/:slug/_guestbook`      | Add one guestbook entry for the authenticated visitor. |
+| `GET`  | `/folders/:slug/_media/:id.webp` | Serve one protected WebP from the manifest.            |
+| `GET`  | `/folders/:slug/_assets/:name`   | Serve a whitelisted user-interface asset.              |
 
 Each authenticated `GET` of the album page increases its view counter.
 The server stores guestbook entries outside the prepared album and allows one entry per IP address.
@@ -177,10 +179,30 @@ The server escapes guestbook text before it renders the album page.
 5. Test with a disposable album first.
    Test login, protected media, the guestbook, the view counter, and a public page.
 
+## Deployment security checklist
+
+- Store `ORIGIN_SECRET` with `wrangler secret put ORIGIN_SECRET`; keep it out of
+  `wrangler.jsonc` and source. Declare it as a required Worker secret so a
+  deployment without it fails.
+- Configure one exact Worker route per private album and verify the boundary:
+  `/folders/<slug>` and `/folders/<slug>/...` must route privately, while a
+  similar prefix such as `/folders/<slug>-other` must fall through publicly.
+- After deployment, check the private hostname, a prefix-collision URL, a
+  direct request to `pf-origin` without `X-Origin-Auth`, and `/healthz`.
+- Validate and inspect Tunnel ingress before starting it:
+  `cloudflared tunnel ingress validate` and
+  `cloudflared tunnel ingress rule https://pf-origin.<zone>/healthz`.
+- Run `cloudflared` as an unprivileged service. Keep its config and tunnel
+  credentials owned by that account with mode `0600`; do not copy the
+  account-wide `cert.pem` to the Pi.
+- Add Cloudflare rate limiting/WAF coverage for `POST /folders/*/_session` and
+  monitor repeated login failures and origin 5xx responses.
+
 ## Local testing
 
 Copy `selfhost/config.example.json` to `selfhost/config.dev.json`.
-Set `originSecret` to `null` and point `root` to a fixture album.
+Set `originSecret` to `null`, set `allowInsecureLocalOrigin` to `true`, and
+point `root` to a fixture album. Keep `host` on `127.0.0.1`.
 
 Run the server locally:
 
@@ -191,8 +213,10 @@ node selfhost/server.ts --config selfhost/config.dev.json
 Run the tests:
 
 ```sh
-node --test selfhost/*.test.ts
+pnpm test:selfhost
 ```
+
+From inside `selfhost/`, the equivalent command is `pnpm test`.
 
 Run the Worker from `selfhost/worker/`:
 
@@ -203,7 +227,7 @@ wrangler dev
 Type-check the self-hosted code:
 
 ```sh
-./node_modules/.bin/tsc -p selfhost/tsconfig.json
+pnpm check:selfhost
 ```
 
 ## Security summary

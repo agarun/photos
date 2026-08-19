@@ -38,6 +38,7 @@ export type ServerConfig = {
   stateDir: string;
   publicOrigins: string[];
   originSecret: string | null;
+  allowInsecureLocalOrigin?: boolean;
   sessionSecret: string;
   sessionTtlHours: number;
   // Uniform delay applied to every login attempt (timing-oracle guard).

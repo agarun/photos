@@ -3,8 +3,8 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { test } from 'node:test';
 
-import { renderAlbumPage } from './render.ts';
-import type { AlbumManifest } from './types.ts';
+import { renderAlbumPage } from '../server/views/index.ts';
+import type { AlbumManifest } from '../types.ts';
 
 function photo(
   id: string,
@@ -98,11 +98,33 @@ test('guestbook usernames stay single-line and Enter cannot submit them', async 
   );
 
   const script = await readFile(
-    join(import.meta.dirname, 'assets', 'album.js'),
+    join(import.meta.dirname, '..', 'assets', 'album-guestbook.js'),
     'utf8'
   );
   assert.match(script, /data-guestbook-single-line/);
   assert.match(script, /event\.key === 'Enter'/);
   assert.match(script, /event\.preventDefault\(\)/);
   assert.doesNotMatch(script, /status\.textContent = 'Saved'/);
+});
+
+test('escapes untrusted manifest and guestbook content in every HTML context', () => {
+  const attack = `</textarea><script>alert('x')</script><img src=x onerror=alert(1)>`;
+  const html = renderAlbumPage({
+    manifest: {
+      ...manifest([{ id: 'main', title: attack, photos: [photo('cover')] }]),
+      title: attack
+    },
+    pageState: {
+      views: 1,
+      entries: [
+        { id: 'entry-1', username: attack, text: attack, editable: false }
+      ]
+    },
+    guestbookError: attack,
+    guestbookForm: { username: attack, text: attack }
+  });
+
+  assert.doesNotMatch(html, /<script>alert\('x'\)<\/script>/);
+  assert.doesNotMatch(html, /<img src=x onerror=/);
+  assert.match(html, /&lt;\/textarea&gt;&lt;script&gt;/);
 });

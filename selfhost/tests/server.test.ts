@@ -12,9 +12,9 @@ import { test } from 'node:test';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { hashPassword, signSession } from './crypto.ts';
-import { startServer } from './server.ts';
-import type { AlbumManifest, ServerConfig } from './types.ts';
+import { hashPassword, signSession } from '../server/crypto.ts';
+import { startServer } from '../server.ts';
+import type { AlbumManifest, ServerConfig } from '../types.ts';
 
 const PUBLIC_ORIGIN = 'http://public.example';
 const ORIGIN_SECRET = 'test-origin-secret';
@@ -169,10 +169,17 @@ function manifestFor(
 }
 
 test('vendored assets never inject inline styles', async () => {
-  const scripts = ['pig.min.js', 'album.js'];
+  const scripts = [
+    'pig.min.js',
+    'album.js',
+    'album-gallery.js',
+    'album-lightbox.js',
+    'album-navigation.js',
+    'album-guestbook.js'
+  ];
   for (const name of scripts) {
     const source = await readFile(
-      join(import.meta.dirname, 'assets', name),
+      join(import.meta.dirname, '..', 'assets', name),
       'utf8'
     );
     assert.equal(
@@ -183,18 +190,18 @@ test('vendored assets never inject inline styles', async () => {
       `${name} must not create inline styles`
     );
   }
-  const albumScript = await readFile(
-    join(import.meta.dirname, 'assets', 'album.js'),
+  const galleryScript = await readFile(
+    join(import.meta.dirname, '..', 'assets', 'album-gallery.js'),
     'utf8'
   );
-  assert.match(albumScript, /DENSITY_MIN_ASPECT_RATIOS/);
+  assert.match(galleryScript, /DENSITY_MIN_ASPECT_RATIOS/);
   assert.match(
-    albumScript,
+    galleryScript,
     /getMinAspectRatio: \(\) => DENSITY_MIN_ASPECT_RATIOS/
   );
 
   const css = await readFile(
-    join(import.meta.dirname, 'assets', 'album.css'),
+    join(import.meta.dirname, '..', 'assets', 'album.css'),
     'utf8'
   );
   for (const rule of [
@@ -249,6 +256,7 @@ test('private album server integration', async () => {
       stateDir,
       publicOrigins: [PUBLIC_ORIGIN],
       originSecret: ORIGIN_SECRET,
+      allowInsecureLocalOrigin: false,
       sessionSecret: 'test-session-secret',
       sessionTtlHours: 1,
       loginDelayMs: 0,
@@ -283,7 +291,7 @@ test('private album server integration', async () => {
       started,
       ORIGIN_SECRET,
       '/folders/test-album/_session',
-      loginOptions('wrong', { 'CF-Connecting-IP': 'initial-wrong-ip' })
+      loginOptions('wrong', { 'X-Client-IP': '203.0.113.1' })
     );
     const wrongLoginText = await wrongLogin.text();
     assert.equal(wrongLogin.status, 401);
@@ -295,7 +303,7 @@ test('private album server integration', async () => {
       started,
       ORIGIN_SECRET,
       '/folders/test-album/_session',
-      loginOptions(PASSWORD, { 'CF-Connecting-IP': 'successful-login-ip' })
+      loginOptions(PASSWORD, { 'X-Client-IP': '203.0.113.2' })
     );
     assert.equal(successfulLogin.status, 303);
     assert.equal(
@@ -341,7 +349,7 @@ test('private album server integration', async () => {
         headers: {
           Origin: PUBLIC_ORIGIN,
           'Content-Type': 'application/x-www-form-urlencoded',
-          'CF-Connecting-IP': 'guestbook-ip-1',
+          'X-Client-IP': '203.0.113.11',
           ...cookieHeader(cookie)
         }
       }
@@ -390,7 +398,7 @@ test('private album server integration', async () => {
         headers: {
           Origin: PUBLIC_ORIGIN,
           'Content-Type': 'application/x-www-form-urlencoded',
-          'CF-Connecting-IP': 'guestbook-ip-1',
+          'X-Client-IP': '203.0.113.11',
           ...cookieHeader(cookie)
         }
       }
@@ -419,7 +427,7 @@ test('private album server integration', async () => {
         headers: {
           Origin: PUBLIC_ORIGIN,
           'Content-Type': 'application/x-www-form-urlencoded',
-          'CF-Connecting-IP': 'guestbook-ip-2',
+          'X-Client-IP': '203.0.113.12',
           ...cookieHeader(cookie)
         }
       }
@@ -438,7 +446,7 @@ test('private album server integration', async () => {
         headers: {
           Origin: PUBLIC_ORIGIN,
           'Content-Type': 'application/x-www-form-urlencoded',
-          'CF-Connecting-IP': 'guestbook-ip-1',
+          'X-Client-IP': '203.0.113.11',
           ...cookieHeader(cookie)
         }
       }
@@ -516,7 +524,7 @@ test('private album server integration', async () => {
       started,
       ORIGIN_SECRET,
       '/folders/unknown-album/_session',
-      loginOptions('wrong', { 'CF-Connecting-IP': 'unknown-album-ip' })
+      loginOptions('wrong', { 'X-Client-IP': '203.0.113.20' })
     );
     const unknownLoginText = await unknownLogin.text();
     assert.equal(unknownLogin.status, 401);
@@ -570,7 +578,7 @@ test('private album server integration', async () => {
       loginOptions(PASSWORD, {
         Origin: 'null',
         'Sec-Fetch-Site': 'same-origin',
-        'CF-Connecting-IP': 'null-origin-ip'
+        'X-Client-IP': '203.0.113.21'
       })
     );
     assert.equal(nullOrigin.status, 303);
@@ -597,7 +605,7 @@ test('private album server integration', async () => {
       started,
       ORIGIN_SECRET,
       '/folders/test-album/_session',
-      loginOptions(PASSWORD, { 'CF-Connecting-IP': 'second-success-ip' })
+      loginOptions(PASSWORD, { 'X-Client-IP': '203.0.113.22' })
     );
     const secondCookie = cookiePair(authenticatedAgain);
     for (const traversal of [
@@ -621,6 +629,10 @@ test('private album server integration', async () => {
     const assetCandidates = [
       { name: 'album.css', contentType: 'text/css' },
       { name: 'album.js', contentType: 'text/javascript' },
+      { name: 'album-gallery.js', contentType: 'text/javascript' },
+      { name: 'album-lightbox.js', contentType: 'text/javascript' },
+      { name: 'album-navigation.js', contentType: 'text/javascript' },
+      { name: 'album-guestbook.js', contentType: 'text/javascript' },
       { name: 'pig.min.js', contentType: 'text/javascript' },
       { name: 'photoswipe.esm.min.js', contentType: 'text/javascript' },
       {
@@ -637,7 +649,7 @@ test('private album server integration', async () => {
         existingAsset = {
           ...candidate,
           contents: await readFile(
-            join(import.meta.dirname, 'assets', candidate.name),
+            join(import.meta.dirname, '..', 'assets', candidate.name),
             'utf8'
           )
         };
@@ -687,7 +699,7 @@ test('private album server integration', async () => {
       await missingAsset.text();
     }
 
-    const rateIp = 'rate-limit-test-ip';
+    const rateIp = '203.0.113.30';
     const rateResponses: Response[] = [];
     for (let index = 0; index < 11; index += 1) {
       rateResponses.push(
@@ -696,7 +708,7 @@ test('private album server integration', async () => {
           ORIGIN_SECRET,
           '/folders/test-album/_session',
           loginOptions('wrong', {
-            'CF-Connecting-IP': rateIp
+            'X-Client-IP': rateIp
           })
         )
       );
@@ -730,7 +742,11 @@ test('private album server integration', async () => {
       [13, 14, 15]
     );
 
-    noSecretStarted = await startServer({ ...config, originSecret: null });
+    noSecretStarted = await startServer({
+      ...config,
+      originSecret: null,
+      allowInsecureLocalOrigin: true
+    });
     const localLoginPage = await request(
       noSecretStarted,
       null,

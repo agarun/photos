@@ -6,6 +6,9 @@
   "vars": {
     "PRIVATE_PREFIXES": "/folders/example-album",
     "TUNNEL_ORIGIN": "https://pf-origin.example.com"
+  },
+  "secrets": {
+    "required": ["ORIGIN_SECRET"]
   }
   // Add one route per private album when deploying, for example:
   // "routes": [

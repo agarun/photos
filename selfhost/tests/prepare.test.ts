@@ -18,8 +18,8 @@ import {
   mergeSidecar,
   resolvePhotoId,
   sanitizeStem
-} from './prepare.ts';
-import { readWebpDimensions } from './webp.ts';
+} from '../prepare.ts';
+import { readWebpDimensions } from '../webp.ts';
 
 function riffChunk(type: string, data: Buffer): Buffer {
   const paddedLength = data.length + (data.length % 2);
@@ -111,7 +111,7 @@ function tinyPng(
 function runPrepare(
   args: string[]
 ): Promise<{ code: number | null; stdout: string; stderr: string }> {
-  const script = join(process.cwd(), 'selfhost', 'prepare.ts');
+  const script = join(import.meta.dirname, '..', 'prepare.ts');
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [script, ...args], {
       stdio: ['ignore', 'pipe', 'pipe']
