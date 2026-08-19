@@ -207,33 +207,33 @@ function createPig(section, state) {
 }
 
 const MASONIC_GUTTER = 18;
+const MASONIC_DENSITY_SETTINGS = {
+  s: { gutter: 12, maxColumnCount: 4, targetColumnWidth: 220 },
+  m: { gutter: 18, maxColumnCount: 3, targetColumnWidth: 250 },
+  l: { gutter: 24, maxColumnCount: 2, targetColumnWidth: 400 }
+};
 
-function masonicColumnWidth() {
-  if (window.innerWidth > 2000) return 425;
-  if (window.innerWidth > 1536) return 400;
-  if (window.innerWidth > 1280) return 350;
-  return 250;
-}
-
-function layoutMasonic(section) {
+function layoutMasonic(section, state) {
   if (!section.masonic || section.visiblePhotos.length === 0) return;
 
   const availableWidth = section.grid.clientWidth;
   if (availableWidth <= 0) return;
 
-  const preferredColumnWidth = masonicColumnWidth();
+  const densitySettings =
+    MASONIC_DENSITY_SETTINGS[state.density] ?? MASONIC_DENSITY_SETTINGS.l;
+  const gutter = densitySettings.gutter ?? MASONIC_GUTTER;
+  const preferredColumnWidth = densitySettings.targetColumnWidth ?? 250;
   const columnCount = Math.max(
     1,
     Math.min(
-      4,
+      densitySettings.maxColumnCount ?? 4,
       Math.floor(
-        (availableWidth + MASONIC_GUTTER) /
-          (preferredColumnWidth + MASONIC_GUTTER)
+        (availableWidth + gutter) / (preferredColumnWidth + gutter)
       )
     )
   );
   const columnWidth =
-    (availableWidth - MASONIC_GUTTER * (columnCount - 1)) / columnCount;
+    (availableWidth - gutter * (columnCount - 1)) / columnCount;
   const columnHeights = Array.from({ length: columnCount }, () => 0);
   const anchors = Array.from(section.grid.children);
 
@@ -243,11 +243,11 @@ function layoutMasonic(section) {
     const column = columnHeights.indexOf(Math.min(...columnHeights));
     const height = columnWidth * (photo.height / photo.width);
     anchor.style.width = `${columnWidth}px`;
-    anchor.style.transform = `translate(${column * (columnWidth + MASONIC_GUTTER)}px, ${columnHeights[column]}px)`;
-    columnHeights[column] += height + MASONIC_GUTTER;
+    anchor.style.transform = `translate(${column * (columnWidth + gutter)}px, ${columnHeights[column]}px)`;
+    columnHeights[column] += height + gutter;
   });
 
-  section.grid.style.height = `${Math.max(...columnHeights) - MASONIC_GUTTER}px`;
+  section.grid.style.height = `${Math.max(...columnHeights) - gutter}px`;
 }
 
 function createMasonicAnchor(photo) {
@@ -268,7 +268,7 @@ function createMasonicAnchor(photo) {
   return anchor;
 }
 
-function renderMasonic(section) {
+function renderMasonic(section, state) {
   const fragment = document.createDocumentFragment();
   section.masonic = true;
   section.visiblePhotos.forEach(photo => {
@@ -276,12 +276,12 @@ function renderMasonic(section) {
   });
   section.grid.dataset.pfLayout = LAYOUTS.masonic;
   section.grid.replaceChildren(fragment);
-  layoutMasonic(section);
+  layoutMasonic(section, state);
 }
 
 export function relayoutMasonicSections(state) {
   if (state.layout !== LAYOUTS.masonic || state.mode !== 'desktop') return;
-  state.sections.forEach(layoutMasonic);
+  state.sections.forEach(section => layoutMasonic(section, state));
 }
 
 function renderMobile(section) {
@@ -317,7 +317,7 @@ export function renderSection(section, state) {
   if (state.mode !== 'desktop') {
     renderMobile(section);
   } else if (state.layout === LAYOUTS.masonic) {
-    renderMasonic(section);
+    renderMasonic(section, state);
   } else {
     section.pig = createPig(section, state);
   }

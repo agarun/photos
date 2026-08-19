@@ -48,8 +48,14 @@ test('renders inline controls and a contents nav for multiple subfolders', () =>
   assert.doesNotMatch(html, /pf-section-select/);
   assert.match(html, /id="pf-controls"/);
   assert.match(html, /aria-label="Photo layout"/);
-  assert.match(html, /data-layout="pig"/);
-  assert.match(html, /data-layout="masonic"/);
+  assert.match(html, /class="pf-group pf-toggle-group"/);
+  assert.match(html, /data-toggle-label="S"/);
+  assert.match(html, /data-toggle-label="My Favorites"/);
+  assert.match(html, /data-layout="pig"[^>]*aria-label="Use even rows layout"/);
+  assert.match(
+    html,
+    /data-layout="masonic"[^>]*aria-label="Use staggered columns layout"/
+  );
   assert.match(html, /data-density="s"/);
   assert.match(html, /data-filter="favorites"/);
   assert.match(html, /aria-label="Table of contents"/);
@@ -58,6 +64,11 @@ test('renders inline controls and a contents nav for multiple subfolders', () =>
   assert.match(
     html,
     /class="pf-mobile-menu-navigation">[\s\S]*href="#section-fjords"[\s\S]*href="#guestbook"/
+  );
+  assert.match(html, /class="pf-mobile-menu-icon"/);
+  assert.ok(
+    html.indexOf('data-density="s"') < html.indexOf('data-filter="all"') &&
+      html.indexOf('data-filter="all"') < html.indexOf('data-layout="pig"')
   );
   assert.match(html, /Show Just My Favorites/);
   assert.doesNotMatch(html, /class="pf-mobile-filter"[^>]+data-density/);

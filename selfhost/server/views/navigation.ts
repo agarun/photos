@@ -5,25 +5,45 @@ type AlbumSection = AlbumManifest['sections'][number];
 
 export function renderControls(hasFavorites: boolean): TrustedHtml {
   const layoutControls = html` <div
-    class="pf-group"
+    class="pf-group pf-toggle-group"
     role="group"
     aria-label="Photo layout"
   >
-    <button type="button" data-layout="pig" aria-label="Use Pig.js layout">
-      Pig
+    <button
+      type="button"
+      data-layout="pig"
+      data-toggle-label="Rows"
+      aria-label="Use even rows layout"
+    >
+      Rows
     </button>
-    <button type="button" data-layout="masonic" aria-label="Use Masonic layout">
-      Masonic
+    <button
+      type="button"
+      data-layout="masonic"
+      data-toggle-label="Columns"
+      aria-label="Use staggered columns layout"
+    >
+      Columns
     </button>
   </div>`;
   const filterControls = hasFavorites
-    ? html` <div class="pf-group" role="group" aria-label="Filter photos">
-        <button type="button" data-filter="all" aria-label="Show all photos">
+    ? html` <div
+        class="pf-group pf-toggle-group"
+        role="group"
+        aria-label="Filter photos"
+      >
+        <button
+          type="button"
+          data-filter="all"
+          data-toggle-label="All"
+          aria-label="Show all photos"
+        >
           All
         </button>
         <button
           type="button"
           data-filter="favorites"
+          data-toggle-label="My Favorites"
           aria-label="Show my favorites"
         >
           My Favorites
@@ -31,19 +51,33 @@ export function renderControls(hasFavorites: boolean): TrustedHtml {
       </div>`
     : raw('');
   return html` <div class="pf-controls" id="pf-controls" hidden>
-    ${layoutControls}
-    <div class="pf-group" role="group" aria-label="Photo size">
-      <button type="button" data-density="s" aria-label="Small photos">
+    <div class="pf-group pf-toggle-group" role="group" aria-label="Photo size">
+      <button
+        type="button"
+        data-density="s"
+        data-toggle-label="S"
+        aria-label="Small photos"
+      >
         S
       </button>
-      <button type="button" data-density="m" aria-label="Medium photos">
+      <button
+        type="button"
+        data-density="m"
+        data-toggle-label="M"
+        aria-label="Medium photos"
+      >
         M
       </button>
-      <button type="button" data-density="l" aria-label="Large photos">
+      <button
+        type="button"
+        data-density="l"
+        data-toggle-label="L"
+        aria-label="Large photos"
+      >
         L
       </button>
     </div>
-    ${filterControls}
+    ${filterControls} ${layoutControls}
   </div>`;
 }
 
@@ -95,7 +129,11 @@ export function renderMobileMenu(
     : raw('');
   return html` <details class="pf-mobile-menu">
     <summary class="pf-mobile-menu-summary" aria-label="Open album menu">
-      <span aria-hidden="true">&#8943;</span>
+      <span class="pf-mobile-menu-icon" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
     </summary>
     <div class="pf-mobile-menu-panel">
       ${filters}
