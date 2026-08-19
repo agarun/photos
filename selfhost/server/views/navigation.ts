@@ -4,6 +4,18 @@ import type { AlbumManifest } from '../../types.ts';
 type AlbumSection = AlbumManifest['sections'][number];
 
 export function renderControls(hasFavorites: boolean): TrustedHtml {
+  const layoutControls = html` <div
+    class="pf-group"
+    role="group"
+    aria-label="Photo layout"
+  >
+    <button type="button" data-layout="pig" aria-label="Use Pig.js layout">
+      Pig
+    </button>
+    <button type="button" data-layout="masonic" aria-label="Use Masonic layout">
+      Masonic
+    </button>
+  </div>`;
   const filterControls = hasFavorites
     ? html` <div class="pf-group" role="group" aria-label="Filter photos">
         <button type="button" data-filter="all" aria-label="Show all photos">
@@ -19,6 +31,7 @@ export function renderControls(hasFavorites: boolean): TrustedHtml {
       </div>`
     : raw('');
   return html` <div class="pf-controls" id="pf-controls" hidden>
+    ${layoutControls}
     <div class="pf-group" role="group" aria-label="Photo size">
       <button type="button" data-density="s" aria-label="Small photos">
         S

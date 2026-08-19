@@ -1,8 +1,10 @@
 import {
+  LAYOUTS,
   isDesktop,
   makeSectionRecords,
   readAlbumData,
-  readDensity
+  readDensity,
+  readLayout
 } from './album-gallery.js';
 import { handleSectionClick } from './album-lightbox.js';
 import {
@@ -40,6 +42,7 @@ function start() {
     tocLinks,
     sections: makeSectionRecords(albumData),
     density: isDesktop() ? readDensity() : 'l',
+    layout: isDesktop() ? readLayout() : LAYOUTS.pig,
     filter: 'all',
     mode: null,
     rebuildId: 0

@@ -199,6 +199,8 @@ test('vendored assets never inject inline styles', async () => {
     galleryScript,
     /getMinAspectRatio: \(\) => DENSITY_MIN_ASPECT_RATIOS/
   );
+  assert.match(galleryScript, /LAYOUT_STORAGE_KEY/);
+  assert.match(galleryScript, /renderMasonic/);
 
   const css = await readFile(
     join(import.meta.dirname, '..', 'assets', 'album.css'),
@@ -207,7 +209,8 @@ test('vendored assets never inject inline styles', async () => {
   for (const rule of [
     '.pig-figure',
     '.pig-figure img',
-    '.pig-figure img.pig-loaded'
+    '.pig-figure img.pig-loaded',
+    ".pf-grid[data-pf-layout='masonic']"
   ]) {
     assert.ok(css.includes(rule), `album.css must define ${rule}`);
   }

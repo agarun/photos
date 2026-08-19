@@ -1,9 +1,12 @@
 import {
   DENSITY_IMAGE_SIZES,
+  LAYOUTS,
   isDesktop,
   loadPig,
+  relayoutMasonicSections,
   renderSection,
   saveDensity,
+  saveLayout,
   updateSectionVisibility
 } from './album-gallery.js';
 
@@ -22,6 +25,12 @@ function updateButtons(state) {
         String(button.dataset.filter === state.filter)
       );
     });
+  document.querySelectorAll('[data-layout]').forEach(button => {
+    button.setAttribute(
+      'aria-pressed',
+      String(button.dataset.layout === state.layout)
+    );
+  });
   document.querySelectorAll('.pf-mobile-filter').forEach(button => {
     const showFavorites = state.filter !== 'favorites';
     button.dataset.filter = showFavorites ? 'favorites' : 'all';
@@ -113,7 +122,9 @@ export function rebuild(state, preserveScroll) {
   }
   state.page.dataset.density = state.density;
   const ready =
-    nextMode === 'desktop' ? loadPig(state.assetBase) : Promise.resolve();
+    nextMode === 'desktop' && state.layout === LAYOUTS.pig
+      ? loadPig(state.assetBase)
+      : Promise.resolve();
   return ready.then(() => {
     if (rebuildId !== state.rebuildId) return;
     state.mode = nextMode;
@@ -152,6 +163,17 @@ export function bindControls(state) {
       if (!DENSITY_IMAGE_SIZES[density] || density === state.density) return;
       state.density = density;
       saveDensity(density);
+      updateButtons(state);
+      void rebuild(state, true);
+    });
+  });
+  document.querySelectorAll('[data-layout]').forEach(button => {
+    button.addEventListener('click', () => {
+      const layout = button.dataset.layout;
+      if (!layout || !Object.values(LAYOUTS).includes(layout)) return;
+      if (layout === state.layout) return;
+      state.layout = layout;
+      saveLayout(layout);
       updateButtons(state);
       void rebuild(state, true);
     });
@@ -201,9 +223,11 @@ export function bindResize(state) {
   window.addEventListener('resize', () => {
     window.clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(() => {
-      // Pig handles ordinary width changes; rebuild only when switching modes.
       if (isDesktop() ? state.mode !== 'desktop' : state.mode !== 'mobile') {
         void rebuild(state, true);
+      } else if (isDesktop() && state.layout === LAYOUTS.masonic) {
+        relayoutMasonicSections(state);
+        updateActiveTocLink(state);
       }
     }, 150);
   });

@@ -47,6 +47,9 @@ test('renders inline controls and a contents nav for multiple subfolders', () =>
   assert.doesNotMatch(html, /2026-08|Fixture description/);
   assert.doesNotMatch(html, /pf-section-select/);
   assert.match(html, /id="pf-controls"/);
+  assert.match(html, /aria-label="Photo layout"/);
+  assert.match(html, /data-layout="pig"/);
+  assert.match(html, /data-layout="masonic"/);
   assert.match(html, /data-density="s"/);
   assert.match(html, /data-filter="favorites"/);
   assert.match(html, /aria-label="Table of contents"/);

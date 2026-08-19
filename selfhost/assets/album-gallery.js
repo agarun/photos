@@ -2,6 +2,11 @@ import { makeLightbox, retireLightbox } from './album-lightbox.js';
 
 export const DESKTOP_MIN_WIDTH = 640;
 export const DENSITY_STORAGE_KEY = 'pf-density-v1';
+export const LAYOUT_STORAGE_KEY = 'pf-layout-v1';
+export const LAYOUTS = {
+  pig: 'pig',
+  masonic: 'masonic'
+};
 export const DENSITY_IMAGE_SIZES = {
   s: 300,
   m: 480,
@@ -35,6 +40,23 @@ export function readDensity() {
 export function saveDensity(density) {
   try {
     window.localStorage.setItem(DENSITY_STORAGE_KEY, density);
+  } catch {
+    // Private browsing modes may make localStorage unavailable.
+  }
+}
+
+export function readLayout() {
+  try {
+    const savedLayout = window.localStorage.getItem(LAYOUT_STORAGE_KEY);
+    return savedLayout === LAYOUTS.masonic ? LAYOUTS.masonic : LAYOUTS.pig;
+  } catch {
+    return LAYOUTS.pig;
+  }
+}
+
+export function saveLayout(layout) {
+  try {
+    window.localStorage.setItem(LAYOUT_STORAGE_KEY, layout);
   } catch {
     // Private browsing modes may make localStorage unavailable.
   }
@@ -92,7 +114,8 @@ export function makeSectionRecords(albumData) {
         sourcePhotos: sectionData.photos,
         visiblePhotos: [],
         lightbox: null,
-        pig: null
+        pig: null,
+        masonic: false
       };
     }
   );
@@ -183,6 +206,84 @@ function createPig(section, state) {
   return pig;
 }
 
+const MASONIC_GUTTER = 18;
+
+function masonicColumnWidth() {
+  if (window.innerWidth > 2000) return 425;
+  if (window.innerWidth > 1536) return 400;
+  if (window.innerWidth > 1280) return 350;
+  return 250;
+}
+
+function layoutMasonic(section) {
+  if (!section.masonic || section.visiblePhotos.length === 0) return;
+
+  const availableWidth = section.grid.clientWidth;
+  if (availableWidth <= 0) return;
+
+  const preferredColumnWidth = masonicColumnWidth();
+  const columnCount = Math.max(
+    1,
+    Math.min(
+      4,
+      Math.floor(
+        (availableWidth + MASONIC_GUTTER) /
+          (preferredColumnWidth + MASONIC_GUTTER)
+      )
+    )
+  );
+  const columnWidth =
+    (availableWidth - MASONIC_GUTTER * (columnCount - 1)) / columnCount;
+  const columnHeights = Array.from({ length: columnCount }, () => 0);
+  const anchors = Array.from(section.grid.children);
+
+  anchors.forEach((anchor, index) => {
+    const photo = section.visiblePhotos[index];
+    if (!photo) return;
+    const column = columnHeights.indexOf(Math.min(...columnHeights));
+    const height = columnWidth * (photo.height / photo.width);
+    anchor.style.width = `${columnWidth}px`;
+    anchor.style.transform = `translate(${column * (columnWidth + MASONIC_GUTTER)}px, ${columnHeights[column]}px)`;
+    columnHeights[column] += height + MASONIC_GUTTER;
+  });
+
+  section.grid.style.height = `${Math.max(...columnHeights) - MASONIC_GUTTER}px`;
+}
+
+function createMasonicAnchor(photo) {
+  const anchor = document.createElement('a');
+  const image = document.createElement('img');
+  anchor.href = photo.src;
+  anchor.dataset.pfIndex = String(photo.index);
+  anchor.dataset.pswpWidth = String(photo.width);
+  anchor.dataset.pswpHeight = String(photo.height);
+  anchor.className = 'pf-masonic-item';
+  image.src = photo.src;
+  image.alt = '';
+  image.width = photo.width;
+  image.height = photo.height;
+  image.loading = 'lazy';
+  image.decoding = 'async';
+  anchor.appendChild(image);
+  return anchor;
+}
+
+function renderMasonic(section) {
+  const fragment = document.createDocumentFragment();
+  section.masonic = true;
+  section.visiblePhotos.forEach(photo => {
+    fragment.appendChild(createMasonicAnchor(photo));
+  });
+  section.grid.dataset.pfLayout = LAYOUTS.masonic;
+  section.grid.replaceChildren(fragment);
+  layoutMasonic(section);
+}
+
+export function relayoutMasonicSections(state) {
+  if (state.layout !== LAYOUTS.masonic || state.mode !== 'desktop') return;
+  state.sections.forEach(layoutMasonic);
+}
+
 function renderMobile(section) {
   const fragment = document.createDocumentFragment();
   section.visiblePhotos.forEach(photo => {
@@ -207,9 +308,17 @@ function renderMobile(section) {
 export function renderSection(section, state) {
   retirePig(section);
   retireLightbox(section);
+  section.masonic = false;
+  delete section.grid.dataset.pfLayout;
+  section.grid.style.height = '';
   section.grid.replaceChildren();
   if (section.element.hidden || section.visiblePhotos.length === 0) return;
   section.lightbox = makeLightbox(section);
-  if (state.mode === 'desktop') section.pig = createPig(section, state);
-  else renderMobile(section);
+  if (state.mode !== 'desktop') {
+    renderMobile(section);
+  } else if (state.layout === LAYOUTS.masonic) {
+    renderMasonic(section);
+  } else {
+    section.pig = createPig(section, state);
+  }
 }

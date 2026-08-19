@@ -140,6 +140,23 @@ a {
   display: block;
 }
 
+.pf-grid[data-pf-layout='masonic'] {
+  overflow: hidden;
+}
+
+.pf-grid[data-pf-layout='masonic'] > a {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+.pf-grid[data-pf-layout='masonic'] > a img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .pig-figure {
   position: absolute;
   top: 0;
