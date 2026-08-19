@@ -42,6 +42,7 @@ function renderEntry(
 
 export function renderGuestbook(opts: GuestbookViewOptions): TrustedHtml {
   const form = opts.form ?? { username: '', text: '' };
+  const hasSigned = opts.pageState.entries.some(entry => entry.editable);
   const entryMarkup = opts.pageState.entries
     .slice()
     .reverse()
@@ -61,7 +62,8 @@ export function renderGuestbook(opts: GuestbookViewOptions): TrustedHtml {
       </summary>
       <div class="pf-guestbook-content">
 ${entries}
-        <form class="pf-guestbook-form" method="post" action="/folders/${opts.slug}/_guestbook" id="guestbook-form">
+${hasSigned && opts.error ? html`        <p class="pf-error" role="alert">${opts.error}</p>` : raw('')}
+${hasSigned ? raw('') : html`        <form class="pf-guestbook-form" method="post" action="/folders/${opts.slug}/_guestbook" id="guestbook-form">
           <label class="pf-guestbook-field">
             <input name="username" type="text" placeholder="Your name" aria-label="Username" maxlength="64" autocomplete="name" enterkeyhint="next" required value="${form.username}" data-guestbook-single-line>
           </label>
@@ -69,7 +71,7 @@ ${entries}
             <textarea name="text" rows="3" placeholder="Your message" aria-label="Message" maxlength="2000" required>${form.text}</textarea>
           </label>
 ${opts.error ? html`          <p class="pf-error" role="alert">${opts.error}</p>` : raw('')}          <button type="submit">Sign</button>
-        </form>
+        </form>`}
       </div>
     </details>`;
 }

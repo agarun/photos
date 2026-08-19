@@ -335,6 +335,10 @@ test('private album server integration', async () => {
     const albumPageText = await albumPage.text();
     assert.equal(albumPage.status, 200);
     assert.match(albumPageText, /Test Album/);
+    assert.match(
+      albumPageText,
+      /href="\/folders\/test-album\/_assets\/favicon\.ico"/
+    );
     assert.match(albumPageText, /1 view/);
     assert.match(albumPageText, /Sign the guestbook/);
     assertSecurityHeaders(albumPage, true);
@@ -365,7 +369,12 @@ test('private album server integration', async () => {
       started,
       ORIGIN_SECRET,
       '/folders/test-album',
-      { headers: cookieHeader(cookie) }
+      {
+        headers: {
+          'X-Client-IP': '203.0.113.11',
+          ...cookieHeader(cookie)
+        }
+      }
     );
     const albumPageAfterGuestbookText = await albumPageAfterGuestbook.text();
     assert.match(albumPageAfterGuestbookText, /2 views/);
@@ -375,6 +384,7 @@ test('private album server integration', async () => {
       /&lt;script&gt;alert\(1\)&lt;\/script&gt;/
     );
     assert.doesNotMatch(albumPageAfterGuestbookText, /<script>alert/);
+    assert.doesNotMatch(albumPageAfterGuestbookText, /id="guestbook-form"/);
     const stateFile = await stat(join(stateDir, 'album-test-album.json'));
     assert.equal(stateFile.mode & 0o777, 0o600);
 
@@ -627,6 +637,7 @@ test('private album server integration', async () => {
     }
 
     const assetCandidates = [
+      { name: 'favicon.ico', contentType: 'image/x-icon' },
       { name: 'album.css', contentType: 'text/css' },
       { name: 'album.js', contentType: 'text/javascript' },
       { name: 'album-gallery.js', contentType: 'text/javascript' },

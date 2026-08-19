@@ -15,7 +15,7 @@ export function renderPage(
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <title>${title}</title>
-<link rel="icon" href="/favicon.ico">
+<link rel="icon" href="${assets}/favicon.ico">
 <link rel="stylesheet" href="${assets}/album.css">
 ${extraHead}</head>
 <body>

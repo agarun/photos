@@ -37,6 +37,7 @@ export const HTML_CONTENT_SECURITY_POLICY = [
 ].join('; ');
 
 export const ASSETS = new Map<string, string>([
+  ['favicon.ico', 'image/x-icon'],
   ['album.css', 'text/css'],
   ['album.js', 'text/javascript'],
   ['album-gallery.js', 'text/javascript'],

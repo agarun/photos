@@ -52,6 +52,10 @@ test('renders inline controls and a contents nav for multiple subfolders', () =>
   assert.match(html, /aria-label="Table of contents"/);
   assert.match(html, /href="#section-bergen"/);
   assert.match(html, /href="#section-fjords"/);
+  assert.match(
+    html,
+    /class="pf-mobile-menu-navigation">[\s\S]*href="#section-fjords"[\s\S]*href="#guestbook"/
+  );
   assert.match(html, /Show Just My Favorites/);
   assert.doesNotMatch(html, /class="pf-mobile-filter"[^>]+data-density/);
   assert.equal((html.match(/data-density=/g) ?? []).length, 3);
@@ -82,11 +86,14 @@ test('guestbook usernames stay single-line and Enter cannot submit them', async 
     /<input[^>]+data-guestbook-single-line[^>]*>/g
   );
 
-  assert.equal(usernameFields?.length, 2);
+  assert.equal(usernameFields?.length, 1);
   for (const field of usernameFields ?? []) {
     assert.match(field, /type="text"/);
     assert.match(field, /enterkeyhint="next"/);
   }
+
+  assert.doesNotMatch(html, /id="guestbook-form"/);
+  assert.match(html, /class="pf-guestbook-edit-form"/);
 
   assert.match(
     html,

@@ -253,7 +253,7 @@ a {
 }
 
 .pf-sidebar-guestbook {
-  margin-top: 2rem;
+  margin-top: 0.5rem;
 }
 
 .pf-group {
@@ -653,6 +653,12 @@ a {
 
   .pf-mobile-menu-controls {
     display: block;
+  }
+
+  .pf-mobile-menu-navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
 
   .pf-mobile-menu .pf-group {

@@ -85,8 +85,11 @@ export function renderMobileMenu(
       <span aria-hidden="true">&#8943;</span>
     </summary>
     <div class="pf-mobile-menu-panel">
-      ${filters} ${tableOfContents}
-      <a class="pf-sidebar-guestbook" href="#guestbook">Guestbook</a>
+      ${filters}
+      <div class="pf-mobile-menu-navigation">
+        ${tableOfContents}
+        <a class="pf-sidebar-guestbook" href="#guestbook">Guestbook</a>
+      </div>
     </div>
   </details>`;
 }
