@@ -56,6 +56,10 @@ test('renders inline controls and a contents nav for multiple subfolders', () =>
     html,
     /data-layout="masonic"[^>]*aria-label="Use staggered columns layout"/
   );
+  assert.match(
+    html,
+    /data-layout="grid"[^>]*aria-label="Use basic grid layout"/
+  );
   assert.match(html, /data-density="s"/);
   assert.match(html, /data-filter="favorites"/);
   assert.match(html, /aria-label="Table of contents"/);
@@ -69,6 +73,9 @@ test('renders inline controls and a contents nav for multiple subfolders', () =>
   assert.ok(
     html.indexOf('data-density="s"') < html.indexOf('data-filter="all"') &&
       html.indexOf('data-filter="all"') < html.indexOf('data-layout="pig"')
+  );
+  assert.ok(
+    html.indexOf('data-layout="masonic"') < html.indexOf('data-layout="grid"')
   );
   assert.match(html, /Show Just My Favorites/);
   assert.doesNotMatch(html, /class="pf-mobile-filter"[^>]+data-density/);

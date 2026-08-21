@@ -64,16 +64,19 @@ a {
 .pf-page[data-density='s'] {
   --pf-section-gap: 4rem;
   --pf-section-min-height: 16rem;
+  --pf-grid-min-column-width: 180px;
 }
 
 .pf-page[data-density='m'] {
   --pf-section-gap: 5rem;
   --pf-section-min-height: 20rem;
+  --pf-grid-min-column-width: 240px;
 }
 
 .pf-page[data-density='l'] {
   --pf-section-gap: 6rem;
   --pf-section-min-height: 24rem;
+  --pf-grid-min-column-width: 320px;
 }
 
 .pf-container {
@@ -152,6 +155,31 @@ a {
 }
 
 .pf-grid[data-pf-layout='masonic'] > a img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pf-grid[data-pf-layout='grid'] {
+  display: grid;
+  grid-column-gap: 18px;
+  grid-row-gap: 5rem;
+  justify-content: center;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(var(--pf-grid-min-column-width, 240px), 1fr)
+  );
+  margin-inline: auto;
+  align-items: center;
+}
+
+.pf-grid[data-pf-layout='grid'] > a {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.pf-grid[data-pf-layout='grid'] > a img {
   display: block;
   width: 100%;
   height: auto;

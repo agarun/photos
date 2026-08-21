@@ -5,7 +5,8 @@ export const DENSITY_STORAGE_KEY = 'pf-density-v1';
 export const LAYOUT_STORAGE_KEY = 'pf-layout-v1';
 export const LAYOUTS = {
   pig: 'pig',
-  masonic: 'masonic'
+  masonic: 'masonic',
+  grid: 'grid'
 };
 export const DENSITY_IMAGE_SIZES = {
   s: 300,
@@ -48,7 +49,9 @@ export function saveDensity(density) {
 export function readLayout() {
   try {
     const savedLayout = window.localStorage.getItem(LAYOUT_STORAGE_KEY);
-    return savedLayout === LAYOUTS.masonic ? LAYOUTS.masonic : LAYOUTS.pig;
+    return Object.values(LAYOUTS).includes(savedLayout)
+      ? savedLayout
+      : LAYOUTS.pig;
   } catch {
     return LAYOUTS.pig;
   }
@@ -279,6 +282,28 @@ function renderMasonic(section, state) {
   layoutMasonic(section, state);
 }
 
+function renderGrid(section) {
+  const fragment = document.createDocumentFragment();
+  section.visiblePhotos.forEach(photo => {
+    const anchor = document.createElement('a');
+    const image = document.createElement('img');
+    anchor.href = photo.src;
+    anchor.dataset.pfIndex = String(photo.index);
+    anchor.dataset.pswpWidth = String(photo.width);
+    anchor.dataset.pswpHeight = String(photo.height);
+    image.src = photo.src;
+    image.alt = '';
+    image.width = photo.width;
+    image.height = photo.height;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    anchor.appendChild(image);
+    fragment.appendChild(anchor);
+  });
+  section.grid.dataset.pfLayout = LAYOUTS.grid;
+  section.grid.replaceChildren(fragment);
+}
+
 export function relayoutMasonicSections(state) {
   if (state.layout !== LAYOUTS.masonic || state.mode !== 'desktop') return;
   state.sections.forEach(section => layoutMasonic(section, state));
@@ -318,6 +343,8 @@ export function renderSection(section, state) {
     renderMobile(section);
   } else if (state.layout === LAYOUTS.masonic) {
     renderMasonic(section, state);
+  } else if (state.layout === LAYOUTS.grid) {
+    renderGrid(section);
   } else {
     section.pig = createPig(section, state);
   }

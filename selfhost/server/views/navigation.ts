@@ -25,6 +25,14 @@ export function renderControls(hasFavorites: boolean): TrustedHtml {
     >
       Columns
     </button>
+    <button
+      type="button"
+      data-layout="grid"
+      data-toggle-label="Grid"
+      aria-label="Use basic grid layout"
+    >
+      Grid
+    </button>
   </div>`;
   const filterControls = hasFavorites
     ? html` <div

@@ -201,6 +201,10 @@ test('vendored assets never inject inline styles', async () => {
   );
   assert.match(galleryScript, /LAYOUT_STORAGE_KEY/);
   assert.match(galleryScript, /renderMasonic/);
+  assert.match(
+    galleryScript,
+    /section\.grid\.dataset\.pfLayout = LAYOUTS\.grid/
+  );
 
   const css = await readFile(
     join(import.meta.dirname, '..', 'assets', 'album.css'),
@@ -210,7 +214,11 @@ test('vendored assets never inject inline styles', async () => {
     '.pig-figure',
     '.pig-figure img',
     '.pig-figure img.pig-loaded',
-    ".pf-grid[data-pf-layout='masonic']"
+    ".pf-grid[data-pf-layout='masonic']",
+    ".pf-grid[data-pf-layout='grid']",
+    '--pf-grid-min-column-width: 320px',
+    'grid-row-gap: 5rem',
+    'align-items: center'
   ]) {
     assert.ok(css.includes(rule), `album.css must define ${rule}`);
   }
