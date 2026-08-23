@@ -195,9 +195,10 @@ test('vendored assets never inject inline styles', async () => {
     'utf8'
   );
   assert.match(galleryScript, /DENSITY_MIN_ASPECT_RATIOS/);
+  assert.match(galleryScript, /minimumRowAspectRatio/);
   assert.match(
     galleryScript,
-    /getMinAspectRatio: \(\) => DENSITY_MIN_ASPECT_RATIOS/
+    /getMinAspectRatio: \(\) =>\s+minimumRowAspectRatio/
   );
   assert.match(galleryScript, /LAYOUT_STORAGE_KEY/);
   assert.match(galleryScript, /renderMasonic/);
@@ -218,7 +219,9 @@ test('vendored assets never inject inline styles', async () => {
     ".pf-grid[data-pf-layout='grid']",
     '--pf-grid-min-column-width: 320px',
     'grid-row-gap: 5rem',
-    'align-items: center'
+    'align-items: center',
+    '@media (min-width: 640px) and (max-width: 1023px)',
+    'padding-inline: clamp(1rem, 4vw, 2rem)'
   ]) {
     assert.ok(css.includes(rule), `album.css must define ${rule}`);
   }

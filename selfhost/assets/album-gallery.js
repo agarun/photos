@@ -69,6 +69,13 @@ export function isDesktop() {
   return window.innerWidth >= DESKTOP_MIN_WIDTH;
 }
 
+export function minimumRowAspectRatio(containerWidth, density) {
+  const minimumAspectRatio =
+    DENSITY_MIN_ASPECT_RATIOS[density] ?? DENSITY_MIN_ASPECT_RATIOS.l;
+  const targetRowHeight = DENSITY_IMAGE_SIZES[density] ?? DENSITY_IMAGE_SIZES.l;
+  return Math.max(minimumAspectRatio, containerWidth / targetRowHeight);
+}
+
 export function loadPig(assetBase) {
   if (window.Pig) return Promise.resolve();
   if (!pigLoadPromise) {
@@ -200,7 +207,8 @@ function createPig(section, state) {
       anchor.appendChild(image);
       return anchor;
     },
-    getMinAspectRatio: () => DENSITY_MIN_ASPECT_RATIOS[state.density],
+    getMinAspectRatio: () =>
+      minimumRowAspectRatio(section.grid.clientWidth, state.density),
     getImageSize: () => DENSITY_IMAGE_SIZES[state.density],
     onClickHandler: () => {}
   };
