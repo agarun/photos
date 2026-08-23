@@ -49,7 +49,7 @@ export function renderGuestbook(opts: GuestbookViewOptions): TrustedHtml {
     .map((entry, index) => renderEntry(opts.slug, entry, index));
   const entries =
     opts.pageState.entries.length === 0
-      ? html`<p class="pf-guestbook-empty">No entries yet.</p>`
+      ? raw('')
       : html`<ol class="pf-guestbook-entries">
           ${entryMarkup}
         </ol>`;

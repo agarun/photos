@@ -93,6 +93,16 @@ test('does not render a contents nav for a single titled subfolder', () => {
   assert.doesNotMatch(html, /aria-label="Table of contents"/);
 });
 
+test('does not render empty guestbook copy', () => {
+  const html = renderAlbumPage({
+    manifest: manifest([{ id: 'main', title: '', photos: [photo('cover')] }]),
+    pageState: { views: 0, entries: [] }
+  });
+
+  assert.doesNotMatch(html, /No entries yet\./);
+  assert.match(html, /id="guestbook-form"/);
+});
+
 test('guestbook usernames stay single-line and Enter cannot submit them', async () => {
   const html = renderAlbumPage({
     manifest: manifest([{ id: 'main', title: '', photos: [photo('cover')] }]),

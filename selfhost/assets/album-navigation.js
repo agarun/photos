@@ -112,6 +112,17 @@ function restoreScrollAnchorAfterLayout(state, anchor) {
   });
 }
 
+function alignSidebarToFirstImage(state) {
+  const sidebar = document.querySelector('.pf-sidebar-inner');
+  const firstVisibleSection = state.sections.find(
+    section => !section.element.hidden
+  );
+  if (!sidebar || !firstVisibleSection) return;
+  const gridTop =
+    firstVisibleSection.grid.getBoundingClientRect().top + window.scrollY;
+  sidebar.style.setProperty('--pf-sidebar-top', `${gridTop}px`);
+}
+
 export function rebuild(state, preserveScroll) {
   const rebuildId = ++state.rebuildId;
   const anchor = preserveScroll ? captureScrollAnchor(state) : null;
@@ -130,6 +141,10 @@ export function rebuild(state, preserveScroll) {
     state.mode = nextMode;
     updateSectionVisibility(state, updateActiveTocLink);
     state.sections.forEach(section => renderSection(section, state));
+    alignSidebarToFirstImage(state);
+    document.fonts?.ready.then(() => {
+      if (rebuildId === state.rebuildId) alignSidebarToFirstImage(state);
+    });
     restoreScrollAnchorAfterLayout(state, anchor);
   });
 }
@@ -229,6 +244,7 @@ export function bindResize(state) {
         relayoutMasonicSections(state);
         updateActiveTocLink(state);
       }
+      alignSidebarToFirstImage(state);
     }, 150);
   });
 }
