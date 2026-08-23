@@ -160,27 +160,6 @@ a {
   height: auto;
 }
 
-.pf-grid a[data-pf-portrait] {
-  aspect-ratio: 9 / 10;
-  display: grid;
-  place-items: center;
-  background: #f3f4f6;
-}
-
-.pf-grid a[data-pf-portrait] img:not(.pig-thumbnail),
-.pig-figure[data-pf-portrait] img:not(.pig-thumbnail) {
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
-}
-
-.pig-figure[data-pf-portrait] img:not(.pig-thumbnail) {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
 .pf-grid[data-pf-layout='grid'] {
   display: grid;
   grid-column-gap: 18px;

@@ -18,7 +18,6 @@ export const DENSITY_MIN_ASPECT_RATIOS = {
   m: 2.25,
   l: 1
 };
-export const PORTRAIT_CARD_ASPECT_RATIO = 0.9;
 
 let pigLoadPromise;
 
@@ -98,20 +97,6 @@ function makePhoto(photo, mediaBase, index) {
   };
 }
 
-function isPortraitCard(photo) {
-  return photo.width / photo.height < PORTRAIT_CARD_ASPECT_RATIO;
-}
-
-function displayAspectRatio(photo) {
-  return Math.max(photo.width / photo.height, PORTRAIT_CARD_ASPECT_RATIO);
-}
-
-// Pig assigns its own className to the element returned by createElement,
-// so portrait cards are tagged with a data attribute instead of a class.
-function markPortraitCard(element, photo) {
-  if (isPortraitCard(photo)) element.dataset.pfPortrait = 'true';
-}
-
 export function makeSectionRecords(albumData) {
   const dataById = new Map(
     albumData.sections.map(section => [section.id, section])
@@ -189,7 +174,7 @@ function createPig(section, state) {
   );
   const data = section.visiblePhotos.map(photo => ({
     filename: photo.src,
-    aspectRatio: displayAspectRatio(photo)
+    aspectRatio: photo.width / photo.height
   }));
   const options = {
     containerId: section.grid.id,
@@ -207,7 +192,6 @@ function createPig(section, state) {
       anchor.dataset.pfIndex = String(photo.index);
       anchor.dataset.pswpWidth = String(photo.width);
       anchor.dataset.pswpHeight = String(photo.height);
-      markPortraitCard(anchor, photo);
       image.src = filename;
       image.alt = '';
       image.width = photo.width;
@@ -260,7 +244,7 @@ function layoutMasonic(section, state) {
     const photo = section.visiblePhotos[index];
     if (!photo) return;
     const column = columnHeights.indexOf(Math.min(...columnHeights));
-    const height = columnWidth / displayAspectRatio(photo);
+    const height = columnWidth * (photo.height / photo.width);
     anchor.style.width = `${columnWidth}px`;
     anchor.style.transform = `translate(${column * (columnWidth + gutter)}px, ${columnHeights[column]}px)`;
     columnHeights[column] += height + gutter;
@@ -277,7 +261,6 @@ function createMasonicAnchor(photo) {
   anchor.dataset.pswpWidth = String(photo.width);
   anchor.dataset.pswpHeight = String(photo.height);
   anchor.className = 'pf-masonic-item';
-  markPortraitCard(anchor, photo);
   image.src = photo.src;
   image.alt = '';
   image.width = photo.width;
@@ -308,7 +291,6 @@ function renderGrid(section) {
     anchor.dataset.pfIndex = String(photo.index);
     anchor.dataset.pswpWidth = String(photo.width);
     anchor.dataset.pswpHeight = String(photo.height);
-    markPortraitCard(anchor, photo);
     image.src = photo.src;
     image.alt = '';
     image.width = photo.width;
