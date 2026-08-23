@@ -9,7 +9,7 @@ async function Folders() {
     <section className="flex flex-col justify-center sm:flex-row sm:my-20 sm:mt-48">
       <div className="max-sm:px-2 px-4 w-full max-w-6xl">
         <h1 className="font-semibold tracking-tight text-4xl mb-16 w-full text-gray-800">
-          Album Folders
+          Folders
         </h1>
 
         <ul className="flex flex-col justify-center items-start gap-5 mb-32">
