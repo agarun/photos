@@ -10,7 +10,7 @@ prepared_dir=$1
 remote=$2
 slug=$3
 manifest="$prepared_dir/album.json"
-destination="$remote:/srv/private-folders/$slug/"
+destination="$remote:/srv/photos-private/$slug/"
 
 if [[ ! -d "$prepared_dir" || ! -f "$manifest" ]]; then
   printf 'Prepared directory must contain album.json: %s\n' "$prepared_dir" >&2

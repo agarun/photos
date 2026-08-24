@@ -181,6 +181,12 @@ The server escapes guestbook text before it renders the album page.
 
 ## Deployment security checklist
 
+This repository is deployed on the Pi with the `photos-private` naming, a
+system-wide mise Node install, and corrected config permissions. See
+[DEPLOY-NOTES.md](DEPLOY-NOTES.md) for the actual deployment record before
+following the generic steps below.
+
+
 - Store `ORIGIN_SECRET` with `wrangler secret put ORIGIN_SECRET`; keep it out of
   `wrangler.jsonc` and source. Declare it as a required Worker secret so a
   deployment without it fails.
