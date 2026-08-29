@@ -149,4 +149,3 @@ proxied (orange cloud) for the Worker route to fire.
 
 Rotate an album password by writing a new hash and incrementing that album's
 `authVersion`, which invalidates existing sessions for it.
-
