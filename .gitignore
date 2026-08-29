@@ -39,3 +39,6 @@ next-env.d.ts
 selfhost/config.json
 selfhost/config.*.json
 !selfhost/config.example.json
+
+# locally prepared albums (generated webp output)
+/selfhost/albums/

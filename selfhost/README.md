@@ -52,14 +52,89 @@ Create `<source>/.photos-album.json` to set the title and favorites:
 
 ```json
 {
-  "title": "Norway 2026",
+  "title": "Scandinavia",
   "favorites": ["02-lofoten/sunset.jpg"]
 }
 ```
 
 Use source-relative paths in `favorites`.
 The sidecar can also set `description` and `date`.
+Use `sectionOrder` with source-relative folder names to set the section order;
+unlisted folders keep their natural ascending order. Use `excluded` for photos
+that should stay on disk but not appear in the album.
+
+```json
+{
+  "title": "Scandinavia",
+  "sectionOrder": ["bergen", "oslo", "copenhagen"],
+  "excluded": []
+}
+```
+
 The tool writes `album.json` and prepared WebP files to the output directory.
+
+## Curate favorites and order with the admin UI
+
+Run the local admin tool against your source directory. Point `--preview-dir`
+at the prepared album directory so the admin uses the smaller WebP previews
+instead of decoding the original JPEGs:
+
+```sh
+node selfhost/admin.ts <source-dir> --preview-dir <prepared-dir>
+```
+
+It binds to `127.0.0.1` only and never leaves your machine.
+Open `http://127.0.0.1:<port>/` (the port is printed on start; pass `--port <port>` to change it).
+
+Drag photos within a section to reorder them.
+Click a photo's star to favorite it.
+Use `Sort A–Z` to restore ascending filename order, or `Remove` to exclude a
+photo from the album without deleting the source file.
+Every change is saved straight into `<source>/.photos-album.json`:
+
+```json
+{
+  "title": "Scandinavia",
+  "favorites": ["02-lofoten/sunset.jpg"],
+  "order": ["02-lofoten/sunset.jpg", "01-oslo/harbor.jpg"]
+}
+```
+
+`order` uses source-relative paths.
+Paths listed in `order` come first, in that order;
+unlisted photos keep their natural name order after them.
+Reordering only applies within a section because sections map to source folders.
+The admin tool preserves any other sidecar fields such as `title`, `description`, and `date`.
+
+After curating, run `prepare.ts` as usual — the generated manifest carries both
+the favorite flags and the new order. The public album does not change merely
+because the sidecar was saved; refresh the viewer after rebuilding locally.
+
+## Rebuilding an album while editing
+
+`prepare.ts` is incremental: it caches conversions by source content hash,
+so re-running after a new export only converts new or changed files.
+Favorites and order live in the sidecar, so they survive every re-run.
+Use `update-album.sh` to make this a single command:
+
+```sh
+selfhost/deploy/update-album.sh <source-dir> <slug> <user@host> [--no-sync] [out-dir]
+```
+
+It runs `prepare.ts` into `selfhost/albums/<slug>` (gitignored), then `sync.sh`.
+Pass `--no-sync` to only rebuild locally.
+Typical editing loop on WSL2 with photos on a Windows drive:
+
+```sh
+# after each editing session (new exports landed in the final folder):
+selfhost/deploy/update-album.sh \
+  "/mnt/h/Photo Editing/norway/8-9 to 11 iphone/final_to_serve" \
+  scandinavia aaron@<pi-ip>
+
+# curate favorites and order in the browser first if you like:
+node selfhost/admin.ts "/mnt/h/Photo Editing/norway/8-9 to 11 iphone/final_to_serve" \
+  --preview-dir selfhost/albums/scandinavia
+```
 
 Sync only the prepared directory to the Pi:
 
@@ -86,8 +161,8 @@ Set these fields:
   "sessionTtlHours": 48,
   "albums": [
     {
-      "slug": "norway-2026",
-      "root": "/srv/private-folders/norway-2026",
+      "slug": "scandinavia",
+      "root": "/srv/private-folders/scandinavia",
       "passwordHash": "<generated-password-hash>",
       "authVersion": 1
     }

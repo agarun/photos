@@ -194,17 +194,10 @@ function createPig(section, state) {
     createElement: filename => {
       const photo = photosBySource.get(filename);
       const anchor = document.createElement('a');
-      const image = document.createElement('img');
       anchor.href = filename;
       anchor.dataset.pfIndex = String(photo.index);
       anchor.dataset.pswpWidth = String(photo.width);
       anchor.dataset.pswpHeight = String(photo.height);
-      image.src = filename;
-      image.alt = '';
-      image.width = photo.width;
-      image.height = photo.height;
-      image.decoding = 'async';
-      anchor.appendChild(image);
       return anchor;
     },
     getMinAspectRatio: () =>

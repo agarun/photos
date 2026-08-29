@@ -206,6 +206,16 @@ test('vendored assets never inject inline styles', async () => {
     galleryScript,
     /section\.grid\.dataset\.pfLayout = LAYOUTS\.grid/
   );
+  const adminScript = await readFile(
+    join(import.meta.dirname, '..', 'server', 'admin-ui.ts'),
+    'utf8'
+  );
+  assert.match(adminScript, /IntersectionObserver/);
+  assert.match(adminScript, /hydrateCard/);
+  assert.match(adminScript, /pf-admin-placeholder/);
+  assert.match(adminScript, /pointerdown/);
+  assert.match(adminScript, /restorePhoto/);
+  assert.match(adminScript, /pf-admin-removed-section/);
 
   const css = await readFile(
     join(import.meta.dirname, '..', 'assets', 'album.css'),

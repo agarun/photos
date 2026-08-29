@@ -46,6 +46,9 @@ export type Sidecar = {
   description?: string;
   date?: string;
   favorites?: string[];
+  order?: string[];
+  sectionOrder?: string[];
+  excluded?: string[];
 };
 
 export type MetadataFlags = {
@@ -59,6 +62,9 @@ export type MergedMetadata = {
   description: string | null;
   date: string | null;
   favorites: string[];
+  order: string[];
+  sectionOrder: string[];
+  excluded: string[];
 };
 
 type CacheEntry = {
@@ -188,6 +194,35 @@ export function deriveSections(relativePaths: string[]): DerivedSection[] {
   });
 }
 
+/** Reorder sections by source-relative directory while keeping unlisted sections natural. */
+export function applySectionOrder(
+  sections: DerivedSection[],
+  sectionOrder: readonly string[]
+): void {
+  const rank = new Map<string, number>();
+  sectionOrder.forEach((relativeDir, index) => {
+    if (!rank.has(relativeDir)) rank.set(relativeDir, index);
+  });
+  sections.sort((left, right) => {
+    const leftRank = rank.get(left.relativeDir);
+    const rightRank = rank.get(right.relativeDir);
+    if (leftRank !== undefined || rightRank !== undefined) {
+      if (leftRank === undefined) return 1;
+      if (rightRank === undefined) return -1;
+      if (leftRank !== rightRank) return leftRank - rightRank;
+    }
+    return naturalCompare(left.relativeDir, right.relativeDir);
+  });
+}
+
+export function filterExcludedPhotos(
+  photos: readonly DiscoveredPhoto[],
+  excluded: readonly string[]
+): DiscoveredPhoto[] {
+  const excludedPaths = new Set(excluded);
+  return photos.filter(photo => !excludedPaths.has(photo.relativePath));
+}
+
 export function prettifyName(value: string): string {
   const words = value
     .replace(/[-_]+/g, ' ')
@@ -200,7 +235,7 @@ export function prettifyName(value: string): string {
     .join(' ');
 }
 
-function normalizeFavorite(value: string): string {
+export function normalizeFavorite(value: string): string {
   return value.replaceAll('\\', '/').replace(/^\.\//, '');
 }
 
@@ -213,8 +248,36 @@ export function mergeSidecar(
     title: flags.title ?? sidecar.title ?? prettifyName(sourceBasename),
     description: flags.description ?? sidecar.description ?? null,
     date: flags.date ?? sidecar.date ?? null,
-    favorites: (sidecar.favorites ?? []).map(normalizeFavorite)
+    favorites: (sidecar.favorites ?? []).map(normalizeFavorite),
+    order: (sidecar.order ?? []).map(normalizeFavorite),
+    sectionOrder: (sidecar.sectionOrder ?? []).map(normalizeFavorite),
+    excluded: (sidecar.excluded ?? []).map(normalizeFavorite)
   };
+}
+
+/**
+ * Reorder each section's photos to follow the sidecar `order` list.
+ * Paths present in `order` come first in list order; the remaining photos
+ * keep their discovered (natural name) order after them.
+ */
+export function applyPhotoOrder(
+  sections: DerivedSection[],
+  order: readonly string[]
+): void {
+  if (order.length === 0) return;
+  const rank = new Map(order.map((path, index) => [path, index]));
+  for (const section of sections) {
+    const ranked = section.photos.filter(photo => rank.has(photo.relativePath));
+    const unranked = section.photos.filter(
+      photo => !rank.has(photo.relativePath)
+    );
+    ranked.sort(
+      (left, right) =>
+        (rank.get(left.relativePath) as number) -
+        (rank.get(right.relativePath) as number)
+    );
+    section.photos = [...ranked, ...unranked];
+  }
 }
 
 export function resolvePhotoId(
@@ -388,7 +451,9 @@ function resizeArguments(
     : ['-resize', '0', String(maxEdge)];
 }
 
-async function discoverPhotos(sourceDir: string): Promise<DiscoveredPhoto[]> {
+export async function discoverPhotos(
+  sourceDir: string
+): Promise<DiscoveredPhoto[]> {
   const relativePaths: string[] = [];
 
   async function walk(currentDir: string, relativeDir: string): Promise<void> {
@@ -681,7 +746,7 @@ function parseCli(argv: string[]): CliOptions | null {
   return { sourceDir, slug, outputDir, quality, maxEdge, metadata };
 }
 
-async function readSidecar(sourceDir: string): Promise<Sidecar> {
+export async function readSidecar(sourceDir: string): Promise<Sidecar> {
   let text: string;
   try {
     text = await readFile(join(sourceDir, SIDECAR_FILENAME), 'utf8');
@@ -714,11 +779,34 @@ async function readSidecar(sourceDir: string): Promise<Sidecar> {
       `${SIDECAR_FILENAME} field favorites must be an array of strings`
     );
   }
+  if (
+    record.order !== undefined &&
+    (!Array.isArray(record.order) ||
+      record.order.some(item => typeof item !== 'string'))
+  ) {
+    throw new Error(
+      `${SIDECAR_FILENAME} field order must be an array of strings`
+    );
+  }
+  for (const key of ['sectionOrder', 'excluded']) {
+    if (
+      record[key] !== undefined &&
+      (!Array.isArray(record[key]) ||
+        record[key].some(item => typeof item !== 'string'))
+    ) {
+      throw new Error(
+        `${SIDECAR_FILENAME} field ${key} must be an array of strings`
+      );
+    }
+  }
   return {
     title: record.title as string | undefined,
     description: record.description as string | undefined,
     date: record.date as string | undefined,
-    favorites: record.favorites as string[] | undefined
+    favorites: record.favorites as string[] | undefined,
+    order: record.order as string[] | undefined,
+    sectionOrder: record.sectionOrder as string[] | undefined,
+    excluded: record.excluded as string[] | undefined
   };
 }
 
@@ -881,13 +969,23 @@ export async function prepareAlbum(
 
   const sidecar = await readSidecar(sourceDir);
   const metadata = mergeSidecar(sidecar, options.metadata, basename(sourceDir));
-  const photos = await discoverPhotos(sourceDir);
+  const allPhotos = await discoverPhotos(sourceDir);
+  const photos = filterExcludedPhotos(allPhotos, metadata.excluded);
   const sections = deriveSections(photos.map(photo => photo.relativePath));
+  applySectionOrder(sections, metadata.sectionOrder);
+  applyPhotoOrder(sections, metadata.order);
   const discoveredPaths = new Set(photos.map(photo => photo.relativePath));
   for (const favorite of metadata.favorites) {
     if (!discoveredPaths.has(favorite)) {
       console.error(
         `Warning: favorite entry matched no discovered photo: ${favorite}`
+      );
+    }
+  }
+  for (const ordered of metadata.order) {
+    if (!discoveredPaths.has(ordered)) {
+      console.error(
+        `Warning: order entry matched no discovered photo: ${ordered}`
       );
     }
   }

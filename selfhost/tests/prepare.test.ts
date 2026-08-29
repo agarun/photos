@@ -9,11 +9,15 @@ import {
   writeFile
 } from 'node:fs/promises';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { deflateSync } from 'node:zlib';
 import { test } from 'node:test';
 
 import {
+  applyPhotoOrder,
+  applySectionOrder,
   deriveSections,
+  filterExcludedPhotos,
   isCommandAvailable,
   mergeSidecar,
   resolvePhotoId,
@@ -174,7 +178,10 @@ test('merges sidecar metadata with CLI overrides and fallback title', () => {
       title: 'Sidecar title',
       description: 'Sidecar description',
       date: '2026-08',
-      favorites: ['./2-section/photo.jpg']
+      favorites: ['./2-section/photo.jpg'],
+      order: ['2-section/two-10.jpg', './2-section/two-2.jpg'],
+      sectionOrder: ['10-section'],
+      excluded: ['./2-section/hidden.jpg']
     },
     { title: 'CLI title', date: '2026-09' },
     'summer-trip'
@@ -183,9 +190,67 @@ test('merges sidecar metadata with CLI overrides and fallback title', () => {
     title: 'CLI title',
     description: 'Sidecar description',
     date: '2026-09',
-    favorites: ['2-section/photo.jpg']
+    favorites: ['2-section/photo.jpg'],
+    order: ['2-section/two-10.jpg', '2-section/two-2.jpg'],
+    sectionOrder: ['10-section'],
+    excluded: ['2-section/hidden.jpg']
   });
   assert.equal(mergeSidecar({}, {}, 'summer-trip').title, 'Summer Trip');
+});
+
+test('applies sidecar order inside sections without dropping photos', () => {
+  const sections = deriveSections([
+    '01-section/a.jpg',
+    '01-section/b.jpg',
+    '01-section/c.jpg',
+    '02-section/d.jpg'
+  ]);
+  applyPhotoOrder(sections, [
+    '01-section/c.jpg',
+    '01-section/a.jpg',
+    '02-section/d.jpg'
+  ]);
+  assert.deepEqual(
+    sections.map(section => section.id),
+    ['01-section', '02-section']
+  );
+  assert.deepEqual(
+    sections[0]?.photos.map(photo => photo.fileName),
+    // Ordered paths come first in list order; the unlisted photo (b) keeps
+    // its natural position after them.
+    ['c.jpg', 'a.jpg', 'b.jpg']
+  );
+  assert.deepEqual(
+    sections[1]?.photos.map(photo => photo.fileName),
+    ['d.jpg']
+  );
+});
+
+test('applies explicit section order and filters excluded photos', () => {
+  const photos = [
+    { relativePath: 'oslo/b.jpg', relativeDir: 'oslo', fileName: 'b.jpg' },
+    {
+      relativePath: 'bergen/a.jpg',
+      relativeDir: 'bergen',
+      fileName: 'a.jpg'
+    },
+    {
+      relativePath: 'copenhagen/c.jpg',
+      relativeDir: 'copenhagen',
+      fileName: 'c.jpg'
+    }
+  ];
+  const active = filterExcludedPhotos(photos, ['oslo/b.jpg']);
+  const sections = deriveSections(active.map(photo => photo.relativePath));
+  applySectionOrder(sections, ['bergen', 'oslo', 'copenhagen']);
+  assert.deepEqual(
+    sections.map(section => section.title),
+    ['Bergen', 'Copenhagen']
+  );
+  assert.deepEqual(
+    filterExcludedPhotos(photos, []).map(photo => photo.relativePath),
+    ['oslo/b.jpg', 'bergen/a.jpg', 'copenhagen/c.jpg']
+  );
 });
 
 test('reads VP8, VP8L, and VP8X dimensions and rejects malformed headers', () => {
@@ -221,7 +286,7 @@ test('prepares an album incrementally and mirrors stale output', async t => {
     return;
   }
 
-  const root = await mkdtemp('/private/tmp/photos-prepare-test-');
+  const root = await mkdtemp(join(tmpdir(), 'photos-prepare-test-'));
   try {
     const source = join(root, 'source');
     const output = join(root, 'output');
