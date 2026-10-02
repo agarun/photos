@@ -33,6 +33,14 @@ export function renderControls(hasFavorites: boolean): TrustedHtml {
     >
       Grid
     </button>
+    <button
+      type="button"
+      data-layout="feed"
+      data-toggle-label="Feed"
+      aria-label="Use centered flow layout"
+    >
+      Feed
+    </button>
   </div>`;
   const filterControls = hasFavorites
     ? html` <div

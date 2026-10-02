@@ -295,6 +295,28 @@ a {
   height: auto;
 }
 
+.pf-grid[data-pf-layout='feed'] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+}
+
+.pf-grid[data-pf-layout='feed'] > a {
+  flex: 0 0 auto;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.pf-grid[data-pf-layout='feed'] > a img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  padding: 2px 2px 0 0;
+}
+
 .pig-figure {
   position: absolute;
   top: 0;

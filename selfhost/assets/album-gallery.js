@@ -6,7 +6,8 @@ export const LAYOUT_STORAGE_KEY = 'pf-layout-v1';
 export const LAYOUTS = {
   pig: 'pig',
   masonic: 'masonic',
-  grid: 'grid'
+  grid: 'grid',
+  feed: 'feed'
 };
 export const DENSITY_IMAGE_SIZES = {
   s: 300,
@@ -17,6 +18,11 @@ export const DENSITY_MIN_ASPECT_RATIOS = {
   s: 3.5,
   m: 2.25,
   l: 1
+};
+export const FEED_MAX_WIDTHS = {
+  s: 450,
+  m: 720,
+  l: 905
 };
 
 let pigLoadPromise;
@@ -272,6 +278,43 @@ function createMasonicAnchor(photo) {
   return anchor;
 }
 
+export function feedImageDimensions(photo, density) {
+  const maxWidth = FEED_MAX_WIDTHS[density] ?? FEED_MAX_WIDTHS.l;
+  const width = Math.min(photo.width, maxWidth);
+  return {
+    width,
+    height: Math.max(1, Math.round((photo.height * width) / photo.width))
+  };
+}
+
+function createFeedAnchor(photo, state) {
+  const anchor = document.createElement('a');
+  const image = document.createElement('img');
+  const dimensions = feedImageDimensions(photo, state.density);
+  anchor.href = photo.src;
+  anchor.dataset.pfIndex = String(photo.index);
+  anchor.dataset.pswpWidth = String(photo.width);
+  anchor.dataset.pswpHeight = String(photo.height);
+  anchor.className = 'pf-feed-item';
+  image.src = photo.src;
+  image.alt = '';
+  image.width = dimensions.width;
+  image.height = dimensions.height;
+  image.loading = 'lazy';
+  image.decoding = 'async';
+  anchor.appendChild(image);
+  return anchor;
+}
+
+function renderFeed(section, state) {
+  const fragment = document.createDocumentFragment();
+  section.visiblePhotos.forEach(photo => {
+    fragment.appendChild(createFeedAnchor(photo, state));
+  });
+  section.grid.dataset.pfLayout = LAYOUTS.feed;
+  section.grid.replaceChildren(fragment);
+}
+
 function renderMasonic(section, state) {
   const fragment = document.createDocumentFragment();
   section.masonic = true;
@@ -346,6 +389,8 @@ export function renderSection(section, state) {
     renderMasonic(section, state);
   } else if (state.layout === LAYOUTS.grid) {
     renderGrid(section);
+  } else if (state.layout === LAYOUTS.feed) {
+    renderFeed(section, state);
   } else {
     section.pig = createPig(section, state);
   }
