@@ -60,6 +60,10 @@ test('renders inline controls and a contents nav for multiple subfolders', () =>
     html,
     /data-layout="grid"[^>]*aria-label="Use basic grid layout"/
   );
+  assert.match(
+    html,
+    /data-layout="feed"[^>]*aria-label="Use centered flow layout"/
+  );
   assert.match(html, /data-density="s"/);
   assert.match(html, /data-filter="favorites"/);
   assert.match(html, /aria-label="Table of contents"/);

@@ -206,6 +206,10 @@ test('vendored assets never inject inline styles', async () => {
     galleryScript,
     /section\.grid\.dataset\.pfLayout = LAYOUTS\.grid/
   );
+  assert.match(
+    galleryScript,
+    /section\.grid\.dataset\.pfLayout = LAYOUTS\.feed/
+  );
   const adminScript = await readFile(
     join(import.meta.dirname, '..', 'server', 'admin-ui.ts'),
     'utf8'
@@ -227,6 +231,8 @@ test('vendored assets never inject inline styles', async () => {
     '.pig-figure img.pig-loaded',
     ".pf-grid[data-pf-layout='masonic']",
     ".pf-grid[data-pf-layout='grid']",
+    ".pf-grid[data-pf-layout='feed']",
+    'flex-wrap: wrap',
     '--pf-grid-min-column-width: 320px',
     'grid-row-gap: 5rem',
     'align-items: center',
